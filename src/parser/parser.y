@@ -5,7 +5,7 @@ extern "C" int yylex();
 int yyerror(const char *);
 extern int yylineno;
 
-#include "./stmt.h"
+#include "./parser/stmt.h"
 #include <iostream>
 #include <cstring>
 #include <algorithm>

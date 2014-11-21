@@ -2,7 +2,7 @@
 
 extern stmt_type last_stmt;
 
-void xyzsql_emit_stmt(stmt_type t) {
+void xyzsql_emit_stmt(stmt_type t, statement *stmt) {
     last_stmt = t;
 }
 

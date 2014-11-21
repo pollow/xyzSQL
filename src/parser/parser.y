@@ -12,7 +12,7 @@ extern int yylineno;
 
 // extern function and enum stmt type
 
-extern void xyzsql_emit_stmt(stmt_type t);
+extern void xyzsql_emit_stmt(stmt_type, statement *);
 
 using namespace std;
 
@@ -22,14 +22,25 @@ using namespace std;
     char *strval;
     int intval;
     float floatval;
-    table_info *tableval;
     table_column *colval;
     vector<table_column *> *collist;
     attribute *attrval;
     vector<attribute *> *attrlist;
     vector<string *> *namelist;
+    vector<record_value> *valuelist;
     condition *condval;
     vector<condition *> *condlist;
+    record_value *valueval;
+    
+    // stmt types
+    insert_stmt *insert_stmt_val;
+    create_table_stmt *create_table_stmt_val;
+    create_index_stmt *create_index_stmt_val;
+    select_stmt *select_stmt_val;
+    drop_index_stmt *drop_index_stmt_val;
+    drop_table_stmt *drop_table_stmt_val;
+    delete_stmt *delete_stmt_val;
+    exefile_stmt *exefile_stmt_val;
 };
 
 %token <strval> NAME STRING
@@ -40,13 +51,24 @@ using namespace std;
 %token INSERT INTO VALUES
 
 %type <intval> column_atts opt_length data_type
-%type <tableval> create_stmt
 %type <colval> create_def
 %type <collist> create_col_list
 %type <attrval> attribute
 %type <attrlist> select_list
 %type <namelist> from_list
-%type <condlist> condition;
+%type <condlist> conditions;
+%type <condval> condition;
+%type <valuelist> value_list;
+%type <valueval> value;
+
+%type <insert_stmt_val>             insert_stmt;
+%type <create_table_stmt_val>       create_table_stmt;
+%type <create_index_stmt_val>       create_index_stmt;
+%type <select_stmt_val>             select_stmt;
+%type <drop_index_stmt_val>         drop_index_stmt;
+%type <drop_table_stmt_val>         drop_table_stmt;
+%type <delete_stmt_val>             delete_stmt;
+%type <exefile_stmt_val>            exefile
 
 %%
 
@@ -54,23 +76,23 @@ stmt_list: stmt ';' {  }
          | stmt ';' stmt_list { cout << "Got a create stmt!" << endl; }
 ;
 
-stmt: create_stmt           { xyzsql_emit_stmt(stmt_type::_create_table_stmt); }
-    | select_stmt           { xyzsql_emit_stmt(stmt_type::_select_stmt); }
-    | create_index_stmt     { xyzsql_emit_stmt(stmt_type::_create_index_stmt); }
-    | insesrt_stmt          { xyzsql_emit_stmt(stmt_type::_insert_stmt); }
-    | drop_index_stmt       { xyzsql_emit_stmt(stmt_type::_drop_index_stmt); }
-    | drop_table_stmt       { xyzsql_emit_stmt(stmt_type::_drop_table_stmt); }
-    | transaction_on        { xyzsql_emit_stmt(stmt_type::_transaction_stmt); }
-    | commit                { xyzsql_emit_stmt(stmt_type::_commit_stmt); }
-    | delete_stmt           { xyzsql_emit_stmt(stmt_type::_delete_stmt); }
-    | rollback              { xyzsql_emit_stmt(stmt_type::_rollback_stmt); }
-    | quit                  { xyzsql_emit_stmt(stmt_type::_quit_stmt); }
-    | exefile               { xyzsql_emit_stmt(stmt_type::_exefile_stmt); }
+stmt    : create_table_stmt     { xyzsql_emit_stmt(stmt_type::_create_table_stmt,   $1); }
+        | select_stmt           { xyzsql_emit_stmt(stmt_type::_select_stmt,         $1); }
+        | create_index_stmt     { xyzsql_emit_stmt(stmt_type::_create_index_stmt,   $1); }
+        | insert_stmt           { xyzsql_emit_stmt(stmt_type::_insert_stmt,         $1); }
+        | drop_index_stmt       { xyzsql_emit_stmt(stmt_type::_drop_index_stmt,     $1); }
+        | drop_table_stmt       { xyzsql_emit_stmt(stmt_type::_drop_table_stmt,     $1); }
+        | delete_stmt           { xyzsql_emit_stmt(stmt_type::_delete_stmt,         $1); }
+        | exefile               { xyzsql_emit_stmt(stmt_type::_exefile_stmt,        $1); }
+        | quit                  { xyzsql_emit_stmt(stmt_type::_quit_stmt,           NULL); }
+        | transaction_on        { xyzsql_emit_stmt(stmt_type::_transaction_stmt,    NULL); }
+        | commit                { xyzsql_emit_stmt(stmt_type::_commit_stmt,         NULL); }
+        | rollback              { xyzsql_emit_stmt(stmt_type::_rollback_stmt,       NULL); }
 ;
 
 /* create statements */
 
-create_stmt : CREATE TABLE NAME '(' create_col_list ')' { $$ = new table_info($3, $5);/*cout << "***" << $3 << endl;*/ }
+create_table_stmt : CREATE TABLE NAME '(' create_col_list ')' { $$ = new create_table_stmt($3, $5); }
 ;
 
 data_type: INT                      { $$ = table_column::INTTYPE; cout << "INT" << endl; }
@@ -85,31 +107,31 @@ column_atts :               { $$ = 0; cout << "No Attribute." << endl; }
             | UNIQUE        { $$ = table_column::unique_attr; cout << "UNIQUE" << endl; }
 ;
 
+opt_length  :                   { $$ = 0; }
+            | '(' INTNUM ')'    { $$ = INTNUM; }
+
 create_def  : NAME data_type opt_length column_atts     { $$ = new table_column($1, $2, $3, $4); cout << "This column is: " << $1 << " " << $2 << " " << $3 << endl; }
             | PRIMARY KEY '(' NAME ')'                  {}
             | INDEX '(' NAME ')'                        {}
 ;
 
-opt_length  :                   { $$ = 0; }
-            | '(' INTNUM ')'    { $$ = INTNUM; }
-
-create_col_list :  {}
+create_col_list :                                   {  }
                 | create_def                        { $$ = new vector<table_column *>(); $$->push_back($1);}
                 | create_def ',' create_col_list    { $3->push_back($1); $$ = $3; }
 
 /* create index */
 
-create_index_stmt   : CREATE INDEX NAME ON NAME '(' NAME ')' {}
+create_index_stmt   : CREATE INDEX NAME ON NAME '(' NAME ')' { $$ = new create_index_stmt($3, $5, $7); }
 ;
 
 /* drop table */
 
-drop_table_stmt : DROP TABLE NAME {}
+drop_table_stmt : DROP TABLE NAME { $$ = new drop_table_stmt($3); }
 ;
 
 /* drop index */
 
-drop_index_stmt : DROP INDEX NAME {}
+drop_index_stmt : DROP INDEX NAME { $$ = new drop_index_stmt($3); }
 ;
 
 /* select */
@@ -126,36 +148,38 @@ from_list   : NAME                  { $$ = new vector<string *>(); $$->push_back
             | NAME ',' from_list    { $$ = $3; $$->push_back(new string($1)); }
 ;
 
-condition   : condition AND condition           { $$ = new vector<condition *>($1->size() + $3->size()); merge($1->begin(), $1->end(), $3->begin(), $3->end(), $$->begin()); delete $1; delete $3;}
-            | attribute COMP attribute          { $$ = new vector<condition *>(); $$->push_back(new condition($1, $3, $2)); }
-            | attribute COMP STRING             { $$ = new vector<condition *>(); $$->push_back(new condition($1, $3, $2)); }
-            | attribute COMP INTNUM             { $$ = new vector<condition *>(); $$->push_back(new condition($1, $3, $2)); }
-            | attribute COMP FLOATNUM           { $$ = new vector<condition *>(); $$->push_back(new condition($1, $3, $2)); }
+conditions  : condition                 { $$ = new vector<condition *>(); $$->push_back($1); }
+            | condition AND conditions  { $$ = $3; $$->push_back($1); }
+
+condition   : attribute COMP attribute          { $$ = new condition($1, $3, $2); }
+            | attribute COMP STRING             { $$ = new condition($1, $3, $2); }
+            | attribute COMP INTNUM             { $$ = new condition($1, $3, $2); }
+            | attribute COMP FLOATNUM           { $$ = new condition($1, $3, $2); }
              /* | attribute IN '(' select_stmt ')'  { $$ = new condition($1, $4, $2); } */
 ;
 
-select_stmt : SELECT select_list FROM NAME                      { cout << "SELECT STMT" << endl; select_stmt tmp($2, new vector<string *>(1, new string($4)), new vector<condition *>()); tmp.print();}
-            | SELECT select_list FROM from_list WHERE condition { select_stmt tmp($2, $4, $6); tmp.print();}
+select_stmt : SELECT select_list FROM NAME                          { $$ = new select_stmt($2, new vector<string *>(1, new string($4)), new vector<condition *>()); }
+            | SELECT select_list FROM from_list WHERE conditions    { $$ = new select_stmt($2, $4, $6); }
 ;
 
 /* DELETE */
 
-delete_stmt : DELETE FROM NAME                  {}
-            | DELETE FROM NAME WHERE condition  {}
+delete_stmt : DELETE FROM NAME                  { $$ = new delete_stmt($3, new vector<condition *>); }
+            | DELETE FROM NAME WHERE conditions { $$ = new delete_stmt($3, $5); }
 ;
 
 /* INSERT */
 
-value       : INTNUM            { cout << "int: " << $1; }
-            | FLOATNUM          { cout << "float: " << $1; }
-            | STRING            { cout << "string: " << $1; }
+value       : INTNUM            { $$ = new record_value($1); cout << "int: " << $1 << " "; }
+            | FLOATNUM          { $$ = new record_value($1); cout << "float: " << $1 << " "; }
+            | STRING            { $$ = new record_value($1); cout << "string: " << $1 << " "; }
 ;
 
-value_list  : value                 {}
-            | value_list ',' value  {}
+value_list  : value                 { $$ = new vector<record_value>; $$->push_back(*($1)); delete $1;}
+            | value ',' value_list  { $$->push_back(*($1)); delete $1; }
 ;
 
-insesrt_stmt: INSERT INTO NAME VALUES '(' value_list ')'    { cout << endl << "record inserted" << endl; }
+insert_stmt: INSERT INTO NAME VALUES '(' value_list ')'    { $$ = new insert_stmt($3, $6); }
 
 /* Transaction */
 

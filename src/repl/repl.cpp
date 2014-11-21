@@ -5,6 +5,7 @@
 
 #include "../parser/stmt.h"
 #include "../parser.tab.h"
+#include "repl.h"
 
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
@@ -14,6 +15,8 @@ extern void yy_delete_buffer (YY_BUFFER_STATE b  );
 extern int yyparse ();
  
 using namespace std;
+
+stmt_type last_stmt;
 
 void system_init() { 
     cout << "System Initialized!" << endl;
@@ -38,6 +41,49 @@ int main() {
         yy_switch_to_buffer( my_string_buffer );
         yyparse();
         yy_delete_buffer( my_string_buffer );
+
+        if (last_stmt == stmt_type::_quit_stmt ) {
+            xyzsql_exit();
+        }
+        switch(last_stmt) {
+            case stmt_type::_create_table_stmt:
+                xyzsql_process_create_table();
+                break;
+            case stmt_type::_create_index_stmt:
+                xyzsql_process_create_index();
+                break;
+            case stmt_type::_select_stmt:
+                xyzsql_process_select();
+                break;
+            case stmt_type::_insert_stmt:
+                xyzsql_process_insert();
+                break;
+            case stmt_type::_delete_stmt:
+                xyzsql_process_delete();
+                break;
+            case stmt_type::_drop_table_stmt:
+                xyzsql_process_drop_table();
+                break;
+            case stmt_type::_drop_index_stmt:
+                xyzsql_process_drop_index();
+                break;
+            case stmt_type::_transaction_stmt:
+                xyzsql_process_transaction();
+                break;
+            case stmt_type::_commit_stmt:
+                xyzsql_process_commit();
+                break;
+            case stmt_type::_rollback_stmt:
+                xyzsql_process_rollback();
+                break;
+            case stmt_type::_quit_stmt:
+                xyzsql_exit();
+                break;
+            case stmt_type::_exefile_stmt:
+                xyzsql_batch();
+                break;
+            default: xyzsql_unknown_stmt();
+        }
     }
 
     return 0;

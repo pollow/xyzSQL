@@ -10,6 +10,10 @@ extern int yylineno;
 #include <cstring>
 #include <algorithm>
 
+// extern function and enum stmt type
+
+extern void xyzsql_emit_stmt(stmt_type t);
+
 using namespace std;
 
 %}
@@ -50,18 +54,18 @@ stmt_list: stmt ';' {  }
          | stmt ';' stmt_list { cout << "Got a create stmt!" << endl; }
 ;
 
-stmt: create_stmt {cout << "Got a create stmt!" << endl;}
-    | select_stmt {cout << "Got a select stmt!" << endl;}
-    | create_index_stmt {}
-    | insesrt_stmt      {}
-    | drop_index_stmt   {}
-    | drop_table_stmt   {}
-    | transaction_on    {}
-    | commit            {}
-    | delete_stmt       {}
-    | rollback          {}
-    | quit              {}
-    | exefile           {}
+stmt: create_stmt           { xyzsql_emit_stmt(stmt_type::_create_table_stmt); }
+    | select_stmt           { xyzsql_emit_stmt(stmt_type::_select_stmt); }
+    | create_index_stmt     { xyzsql_emit_stmt(stmt_type::_create_index_stmt); }
+    | insesrt_stmt          { xyzsql_emit_stmt(stmt_type::_insert_stmt); }
+    | drop_index_stmt       { xyzsql_emit_stmt(stmt_type::_drop_index_stmt); }
+    | drop_table_stmt       { xyzsql_emit_stmt(stmt_type::_drop_table_stmt); }
+    | transaction_on        { xyzsql_emit_stmt(stmt_type::_transaction_stmt); }
+    | commit                { xyzsql_emit_stmt(stmt_type::_commit_stmt); }
+    | delete_stmt           { xyzsql_emit_stmt(stmt_type::_delete_stmt); }
+    | rollback              { xyzsql_emit_stmt(stmt_type::_rollback_stmt); }
+    | quit                  { xyzsql_emit_stmt(stmt_type::_quit_stmt); }
+    | exefile               { xyzsql_emit_stmt(stmt_type::_exefile_stmt); }
 ;
 
 /* create statements */
@@ -158,7 +162,7 @@ insesrt_stmt: INSERT INTO NAME VALUES '(' value_list ')'    { cout << endl << "r
 transaction_on  : TRANSACTION ON {}
 ;
 
-commit  : COMMIT {}
+commit      : COMMIT {}
 ;
 
 rollback    : ROLLBACK {}
@@ -175,6 +179,6 @@ exefile : EXEFILE {}
 %%
 
 int yyerror(const char *s) {
-    cout << "Got An Error:" << yylineno << endl;
+    cout << "Got An Error: " << yylineno << endl;
 }
 

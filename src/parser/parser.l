@@ -24,6 +24,8 @@ QUIT            { return QUIT; }
 EXEFILE         { return EXEFILE; }
 TRANSACTION     { return TRANSACTION; }
 ON              { return ON; }
+COMMIT          { return COMMIT; }
+ROLLBACK        { return ROLLBACK; }
 SELECT          { return SELECT; }
 DELETE          { return DELETE; }
 FROM            { return FROM; }
@@ -55,6 +57,7 @@ FLOAT           { return FLOAT; }
 "," |
 "(" |
 ")" |
+"*" |
 "."                 { return yytext[0]; }
 .                   { yyerror(yytext); }
 %%

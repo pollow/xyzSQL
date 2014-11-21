@@ -1,9 +1,26 @@
 #ifndef __STMT_H__
+#define __STMT_H__
 
 #include <iostream>
 #include <vector>
 
 using namespace std;
+
+enum stmt_type {
+    _create_table_stmt = 1,
+    _create_index_stmt,
+    _insert_stmt,
+    _select_stmt,
+    _delete_stmt,
+    _drop_index_stmt,
+    _drop_table_stmt,
+    _transaction_stmt,
+    _commit_stmt,
+    _rollback_stmt,
+    _quit_stmt,
+    _exefile_stmt
+};
+
 
 class table_column {
     public:
@@ -119,5 +136,4 @@ class select_stmt {
         }
 };
 
-#endif 
-
+#endif

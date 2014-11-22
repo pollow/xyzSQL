@@ -6,4 +6,4 @@ main  : ./repl/repl.cpp ./repl/repl.h ./parser/parser.y ./parser/parser.l ./pars
 	c++ ./repl/repl.cpp ./catalog/catalog.cpp parser.tab.o lex.yy.o -std=c++11 -lreadline -ll -o main -g
 
 clean:
-	rm -rf parser.tab.c parser.tab.h lex.yy.c a.out* main *.o
+	rm -rf parser.tab.c parser.tab.h lex.yy.c a.out* main* *.o data

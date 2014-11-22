@@ -3,6 +3,7 @@
 #include <queue>
 
 queue<pair<stmt_type, statement *>> stmt_queue;
+catalog_manager catm("data");
 
 void xyzsql_emit_stmt(stmt_type t, statement *stmt) {
     stmt_queue.push({t, stmt});
@@ -19,9 +20,13 @@ void xyzsql_exit() {
 
 void xyzsql_process_create_table() {
     cout << "table created." << endl;
-    auto s = stmt_queue.front();
-    catalog a(dynamic_cast<create_table_stmt *>(s.second));
-    a.write_back();
+    auto s = dynamic_cast<create_table_stmt *>(stmt_queue.front().second);
+
+    if ( catm.exist_relation(s->name) == NULL ) {
+        catm.add_relation(s);
+        catm.write_back();
+    } else 
+        cerr << "Table name already exists." << endl;
 
 }
 

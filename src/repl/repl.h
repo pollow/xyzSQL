@@ -1,9 +1,10 @@
 #include "../parser/stmt.h"
+#include <queue>
 
-extern stmt_type last_stmt;
+queue<pair<stmt_type, statement *>> stmt_queue;
 
 void xyzsql_emit_stmt(stmt_type t, statement *stmt) {
-    last_stmt = t;
+    stmt_queue.push({t, stmt});
 }
 
 void xyzsql_batch() {

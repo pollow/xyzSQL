@@ -38,6 +38,34 @@ CHAR            { return CHAR; }
 INT             { return INT; }
 FLOAT           { return FLOAT; }
 
+create          { return CREATE;}
+primary         { return PRIMARY; }
+key             { return KEY; }
+index           { return INDEX; }
+table           { return TABLE;}
+unique          { return UNIQUE; }
+not             { return NOT; }
+nullx           { return NULLX; }
+drop            { return DROP; }
+insert          { return INSERT; }
+quit            { return QUIT; }
+exefile         { return EXEFILE; }
+transaction     { return TRANSACTION; }
+on              { return ON; }
+commit          { return COMMIT; }
+rollback        { return ROLLBACK; }
+select          { return SELECT; }
+delete          { return DELETE; }
+from            { return FROM; }
+where           { return WHERE; }
+and             { return AND; }
+into            { return INTO; }
+values          { return VALUES; }
+
+char            { return CHAR; }
+int             { return INT; }
+float           { return FLOAT; }
+
 [a-zA-Z][a-zA-Z0-9_]*       { yylval.strval = strdup(yytext); cout << "NAME: " << yytext << endl; return NAME;}
 
 -?[0-9]+                    { yylval.intval = atoi(yytext); return INTNUM;}

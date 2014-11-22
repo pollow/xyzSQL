@@ -16,8 +16,6 @@ extern int yyparse ();
  
 using namespace std;
 
-stmt_type last_stmt;
-
 void system_init() { 
     cout << "System Initialized!" << endl;
 }
@@ -31,7 +29,7 @@ int main() {
         add_history(line);
 
         int len = strlen(line);
-        for (int i = 0; i < len; i++) line[i] = toupper(line[i]);
+        // for (int i = 0; i < len; i++) line[i] = toupper(line[i]);
         cout << "What you typed: " << line << endl;
         char *tmp = new char[len + 2];
         strcpy(tmp, line);
@@ -42,51 +40,53 @@ int main() {
         yyparse();
         yy_delete_buffer( my_string_buffer );
 
-        if (last_stmt == stmt_type::_quit_stmt ) {
-            xyzsql_exit();
-        }
-        switch(last_stmt) {
-            case stmt_type::_create_table_stmt:
-                xyzsql_process_create_table();
-                break;
-            case stmt_type::_create_index_stmt:
-                xyzsql_process_create_index();
-                break;
-            case stmt_type::_select_stmt:
-                xyzsql_process_select();
-                break;
-            case stmt_type::_insert_stmt:
-                xyzsql_process_insert();
-                break;
-            case stmt_type::_delete_stmt:
-                xyzsql_process_delete();
-                break;
-            case stmt_type::_drop_table_stmt:
-                xyzsql_process_drop_table();
-                break;
-            case stmt_type::_drop_index_stmt:
-                xyzsql_process_drop_index();
-                break;
-            case stmt_type::_transaction_stmt:
-                xyzsql_process_transaction();
-                break;
-            case stmt_type::_commit_stmt:
-                xyzsql_process_commit();
-                break;
-            case stmt_type::_rollback_stmt:
-                xyzsql_process_rollback();
-                break;
-            case stmt_type::_quit_stmt:
-                xyzsql_exit();
-                break;
-            case stmt_type::_exefile_stmt:
-                xyzsql_batch();
-                break;
-            default: xyzsql_unknown_stmt();
+        while( !stmt_queue.empty() ) {
+
+            switch( stmt_queue.front().first ) {
+                case stmt_type::_create_table_stmt:
+                    xyzsql_process_create_table();
+                    break;
+                case stmt_type::_create_index_stmt:
+                    xyzsql_process_create_index();
+                    break;
+                case stmt_type::_select_stmt:
+                    xyzsql_process_select();
+                    break;
+                case stmt_type::_insert_stmt:
+                    xyzsql_process_insert();
+                    break;
+                case stmt_type::_delete_stmt:
+                    xyzsql_process_delete();
+                    break;
+                case stmt_type::_drop_table_stmt:
+                    xyzsql_process_drop_table();
+                    break;
+                case stmt_type::_drop_index_stmt:
+                    xyzsql_process_drop_index();
+                    break;
+                case stmt_type::_transaction_stmt:
+                    xyzsql_process_transaction();
+                    break;
+                case stmt_type::_commit_stmt:
+                    xyzsql_process_commit();
+                    break;
+                case stmt_type::_rollback_stmt:
+                    xyzsql_process_rollback();
+                    break;
+                case stmt_type::_quit_stmt:
+                    xyzsql_exit();
+                    break;
+                case stmt_type::_exefile_stmt:
+                    xyzsql_batch();
+                    break;
+                default: xyzsql_unknown_stmt();
+            }
+
+            stmt_queue.pop();
+
         }
     }
 
     return 0;
-
 }
 

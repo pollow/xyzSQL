@@ -55,3 +55,4 @@ vector<unsigned char> Record::pack( vector<table_column *> *t ) {
 
     return result;
 }
+

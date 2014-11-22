@@ -99,7 +99,6 @@ void xyzsql_process_drop_table() {
 
 void xyzsql_process_drop_index() {
     cout << "index dropped." << endl;
-
 }
 
 void xyzsql_process_delete() {
@@ -130,16 +129,16 @@ void xyzsql_process_delete() {
             int b = 0, c = 0;
             while (a.next(b, c) == 0) {
                 Record a = RecordManager.getRecord(t->relation_name, b, c);
-                calc_conditions();
+                calc_conditions(s->condition_list, a.unpack(catm.exist_relation(t->relation_name)->cols));
                 BufferManager.appendTrashCan(b, c);
             }
         } else {
             indexIterator a;
-            IndexManager.getStarter(a, base_addr + t->relation_name + "/index_" + catm.get_primary(s->table_name) + ".db");
+            IndexManager.getStarter(a, base_addr + s->table_name + "/index_" + catm.get_primary(s->table_name) + ".db");
             int b = 0, c = 0;
             while (a.next(b, c) == 0) {
-                Record a = RecordManager.getRecord(t->relation_name, b, c);
-                calc_conditions();
+                Record a = RecordManager.getRecord(s->table_name, b, c);
+                calc_conditions(s->condition_list, a.unpack(catm.exist_relation(s->table_name)->cols));
                 BufferManager.appendTrashCan(b, c);
             }
         }

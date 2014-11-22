@@ -81,6 +81,9 @@ class algbric_node {
 
 class statement {
 
+    public:
+        virtual ~statement() {};
+
 };
 
 class select_stmt : public statement {

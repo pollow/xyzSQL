@@ -1,6 +1,7 @@
 #include "../parser/stmt.h"
 #include <iostream>
 #include <fstream>
+#include <map>
 
 class catalog {
     private:
@@ -16,7 +17,25 @@ class catalog {
             name(_table->name), cols(_table->cols) {}
 
         catalog(const string &_name);
+
+        const string &get_name();
         
+        void write_back(const string &);
+};
+
+class catalog_manager {
+    private:
+        string base_addr;
+        map<string, catalog *> relations;
+
+    public:
+        catalog_manager(const string &base_addr);
+
+        catalog *exist_relation(const string &rel_name);
+
+        catalog *add_relation(create_table_stmt *);
+
         void write_back();
 
 };
+

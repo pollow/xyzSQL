@@ -23,13 +23,14 @@ BufferManager::~BufferManager() {
 }
 
 File* BufferManager::findFile(std::string filename) {
+	std::string path = dataFileDir + filename;
 	auto f = files.find(filename);
 	File *file = nullptr;
 	if (f != files.end()) {
 		file = f->second;
 	} else {
 		File *n = new File();
-		n->load(filename);
+		n->load(path);
 		files.insert(std::pair<std::string, File*>(filename, n));
 		file = n;
 	}
@@ -91,10 +92,10 @@ BufferRecord *BufferManager::insertQ(std::string filename, int num, Block* b) {
 
 Block BufferManager::readBlock(std::string filename, int index) {
 	std::string path = dataFileDir + filename;
-	BufferRecord *record = findQ(path, index);
+	BufferRecord *record = findQ(filename, index);
 	if (!record) {
-		File* f = findFile(path);
-		record = insertQ(path, index, f->read(index));
+		File* f = findFile(filename);
+		record = insertQ(filename, index, f->read(index));
 	}
 	return *(record->block);
 
@@ -118,12 +119,12 @@ Block BufferManager::readBlock(std::string filename, int index) {
 
 void BufferManager::writeBlock(std::string filename, int index, Block& block) {
 	std::string path = dataFileDir + filename;
-	BufferRecord *record = findQ(path, index);
+	BufferRecord *record = findQ(filename, index);
 	if (!record) {
-		File* f = findFile(path);
+		File* f = findFile(filename);
 		//TODO no need to read f, can use a blank block
 		Block *blank = new Block;
-		record = insertQ(path, index, blank);
+		record = insertQ(filename, index, blank);
 	}
 	*(record->block) = block;
 	record->dirty = true;

@@ -1,5 +1,5 @@
 #include "Block.h"
-
+#include <cstring>
 
 Block::Block() {
 }
@@ -8,6 +8,10 @@ void Block::fillOne() {
 	for (auto i = 0; i < BLOCKSIZE; i++) {
 		data[i] = 0xff;
 	}
+}
+
+void Block::fillZero() {
+	std::memset(data, 0, BLOCKSIZE);
 }
 
 char * Block::dataPointer() {

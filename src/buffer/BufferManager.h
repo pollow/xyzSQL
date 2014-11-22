@@ -1,4 +1,6 @@
 #pragma once
+#ifndef __BUFFER_MANAGER_H__
+#define __BUFFER_MANAGER_H__
 #include <string>
 #include <vector>
 #include <map>
@@ -64,3 +66,5 @@ private:
 	/*Block bufData[BUFSIZE];*/
 	unsigned int time;
 };
+
+#endif

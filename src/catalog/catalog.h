@@ -24,6 +24,10 @@ class catalog {
 
         table_column *get_column(const string &attr_name);
 
+        bool is_unique(const string &);
+
+        string get_primary();
+
 };
 
 class catalog_manager {
@@ -42,5 +46,8 @@ class catalog_manager {
 
         table_column *get_column(attribute *t);
 
+        bool is_unique(attribute *t);
+
+        string get_primary(const string &);
 };
 

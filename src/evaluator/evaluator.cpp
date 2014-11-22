@@ -2,14 +2,15 @@
 #include <readline/history.h>
 #include <iostream>
 #include <cctype>
+#include <cstdlib>
 
 #include "evaluator.h"
 
 queue<pair<stmt_type, statement *> > stmt_queue;
 catalog_manager catm("data");
+extern string base_addr;
 
 bool calc_conditions(vector<condition *> conditions, record_value c) {
-
     for(auto x : conditions) {
         if (x->calc( {catm.get_column(x->left_attr), c} ) == false) 
             return false;
@@ -40,6 +41,7 @@ void xyzsql_process_create_table() {
     if ( catm.exist_relation(s->name) == NULL ) {
         catm.add_relation(s);
         catm.write_back();
+        RecordManager.createMaster(s->name);
     } else 
         cerr << "Table name already exists." << endl;
 
@@ -93,7 +95,6 @@ void xyzsql_process_select() {
 
 void xyzsql_process_drop_table() {
     cout << "table dropped." << endl;
-
 }
 
 void xyzsql_process_drop_index() {
@@ -101,10 +102,74 @@ void xyzsql_process_drop_index() {
 
 }
 
-void xyzsql_process_transaction() {
-    cout << "Transaction on." << endl;
+void xyzsql_process_delete() {
+
+    auto s = dynamic_cast<delete_stmt *>(stmt_queue.front().second);
+
+    if (s->condition_list->empty()) {
+        // delete all
+        assert(base_addr.back() == '/');
+        system(("rm " + base_addr + s->table_name + "/*.db").c_str());
+    } else {
+        BufferManager.newTrashCan();
+        // unique 
+        condition *p = NULL, *eq = NULL;
+        for(auto x : *(s->condition_list)) {
+            if ( catm.is_unique(x->left_attr) ) {
+                p = x;
+                if (x->op == condition::EQUALTO) 
+                    eq = x;
+            }
+        }
+        
+        if ( eq != NULL || p != NULL ) {
+            // use index
+            auto t = eq == NULL ? p->left_attr : eq->left_attr;
+            indexIterator a;
+            IndexManager.selectNode(a, base_addr + t->relation_name + "/index_" + t->attribute + ".db", 1, string(atos(1.1)));
+            int b = 0, c = 0;
+            while (a.next(b, c) == 0) {
+                Record a = RecordManager.getRecord(t->relation_name, b, c);
+                calc_conditions();
+                BufferManager.appendTrashCan(b, c);
+            }
+        } else {
+            indexIterator a;
+            IndexManager.getStarter(a, base_addr + t->relation_name + "/index_" + catm.get_primary(s->table_name) + ".db");
+            int b = 0, c = 0;
+            while (a.next(b, c) == 0) {
+                Record a = RecordManager.getRecord(t->relation_name, b, c);
+                calc_conditions();
+                BufferManager.appendTrashCan(b, c);
+            }
+        }
+        BufferManager.emptyTrashCan();
+    }
+    cout << "records deleted." << endl;
+}
+
+void xyzsql_process_insert() {
+    auto s = dynamic_cast<insert_stmt *>(stmt_queue.front().second);
+
+    // RecordManager.insert(s->table_name, Record(s->values));
+    cout << "record inserted." << endl;
+}
+
+void xyzsql_unknown_stmt() {
+    cout << "unknown statement, check syntax again." << endl;
 
 }
+
+
+
+
+
+
+
+
+
+
+
 
 void xyzsql_process_commit() {
     cout << "Transaction committed." << endl;
@@ -116,21 +181,7 @@ void xyzsql_process_rollback() {
 
 }
 
-void xyzsql_process_delete() {
-    cout << "records deleted." << endl;
-
-    auto c = 
-}
-
-void xyzsql_process_insert() {
-    auto s = dynamic_cast<insert_stmt *>(stmt_queue.front().second);
-
-    RecordManager.insert(s->table_name, Record(s->values));
-    cout << "record inserted." << endl;
-}
-
-void xyzsql_unknown_stmt() {
-    cout << "unknown statement, check syntax again." << endl;
+void xyzsql_process_transaction() {
+    cout << "Transaction on." << endl;
 
 }
-

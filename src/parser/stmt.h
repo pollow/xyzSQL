@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
+#include <sstream>
 
 using namespace std;
 
@@ -71,6 +72,18 @@ class record_value {
 
         int as_int() const {
             return value;
+        }
+
+        string to_str(int data_type) {
+            switch (data_type) {
+                case table_column::INTTYPE : 
+                    return (stringstream() << as_int()).str();
+                case table_column::FLOATTYPE :
+                    return (stringstream() << as_float()).str();
+                case table_column::CHARTYPE :
+                    return string(as_str());
+                default : return "";
+            }
         }
 
         static int compare_as_int(const record_value &a, const record_value &b) {

@@ -108,7 +108,7 @@ column_atts :               { $$ = 0; cout << "No Attribute." << endl; }
 ;
 
 opt_length  :                   { $$ = 0; }
-            | '(' INTNUM ')'    { $$ = INTNUM; }
+            | '(' INTNUM ')'    { $$ = $2; }
 
 create_def  : NAME data_type opt_length column_atts     { $$ = new table_column($1, $2, $3, $4); cout << "This column is: " << $1 << " " << $2 << " " << $3 << endl; }
             | PRIMARY KEY '(' NAME ')'                  {}

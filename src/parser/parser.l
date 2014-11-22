@@ -17,7 +17,7 @@ INDEX           { return INDEX; }
 TABLE           { return TABLE;}
 UNIQUE          { return UNIQUE; }
 NOT             { return NOT; }
-NULLX           { return NULLX; }
+NULL            { return NULLX; }
 DROP            { return DROP; }
 INSERT          { return INSERT; }
 QUIT            { return QUIT; }

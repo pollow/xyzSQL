@@ -29,6 +29,14 @@ void catalog::write_back(const string &addr) {
     out.close();
 }
 
+table_column *catalog::get_column(const string &attr_name) {
+    for(auto x : *cols) {
+        if (x->name == attr_name) return x;
+    }
+
+    return NULL;
+}
+
 const string &catalog::get_name() {
     return name;
 }
@@ -84,3 +92,6 @@ void catalog_manager::write_back() {
     out.close();
 }
 
+table_column *catalog_manager::get_column(attribute *t) {
+            return exist_relation(t->relation_name)->get_column(t->attribute_name);
+        }

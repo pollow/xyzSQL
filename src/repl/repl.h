@@ -1,3 +1,4 @@
+#include "../catalog/catalog.h"
 #include "../parser/stmt.h"
 #include <queue>
 
@@ -18,6 +19,9 @@ void xyzsql_exit() {
 
 void xyzsql_process_create_table() {
     cout << "table created." << endl;
+    auto s = stmt_queue.front();
+    catalog a(dynamic_cast<create_table_stmt *>(s.second));
+    a.write_back();
 
 }
 

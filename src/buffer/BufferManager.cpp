@@ -183,7 +183,7 @@ void BufferManager::Init(IndexManager *im) {
 	this->im = im;
 }
 void BufferManager::emptyTrashCan() {
-	int end = trashFile->tellp();
+	std::streamoff end = trashFile->tellp();
 	trashFile->seekp(0);
 	int b, c;
 	while (trashFile->tellp() < end) {

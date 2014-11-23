@@ -5,10 +5,11 @@
 class Record {
     private:
         vector<record_value> *values;
-        vector<unsigned char> buf;
+        
 
     public:
-
+		vector<unsigned char> buf;
+		Record() { };
         Record( vector<record_value> *t ) : values(t) { }
         Record( const vector<unsigned char> &tmp ) : buf(tmp) {  };
 

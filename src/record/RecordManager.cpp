@@ -2,7 +2,7 @@
 
 
 const std::string RecordManager::master = "master.db";
-
+const std::string RecordManager::trash = "trash.tmp";
 RecordManager::RecordManager(){
 
 }
@@ -92,6 +92,22 @@ Record RecordManager::getRecord(std::string tableName, int blocknum, int offset,
 	std::string filename = master + "/" + tableName;
 	recordBlock r = bm->readBlock(filename, blocknum);
 	return r.getRecord(size, offset);
+}
+
+void RecordManager::newTrashCan() {
+	trashFile = new std::fstream(trash);
+}
+
+void RecordManager::appendTrashCan(int blocknum, int offset) {
+	(*trashFile) << blocknum << "  " << offset << "\n";
+}
+
+void RecordManager::emptyTrashCan() {
+	int end = trashFile->tellp();
+	trashFile->seekp(0);
+	while (trashFile->tellp() < end) {
+		//im->del....;
+	}
 }
 
 RecordManager::~RecordManager() {}

@@ -13,7 +13,7 @@ class IndexManager;
 
 #include <vector>
 #include <cstdint>
-
+#include <fstream>
 #include "Record.h"
 #include "../buffer/BufferManager.h"
 #include "../buffer/Block.h"
@@ -87,6 +87,7 @@ public:
 		headOfRecord = this->dataPointer() + offset;
 		*reinterpret_cast<std::uint32_t *>(headOfRecord) = next;
 	}
+	    
 	Record getRecord(int size, int offset) {
 		char * headOfRecord = this->dataPointer() + offset;
 #ifdef CAN_THROW
@@ -139,6 +140,8 @@ class IndexManager {
 class RecordManager {
 public:
 	const static std::string master;
+	const static std::string trash;
+
 	RecordManager();
 	void Init(BufferManager* BM, catalog_manager* CM, IndexManager * IM);
 	~RecordManager();
@@ -147,12 +150,18 @@ public:
 	void insertRecord(std::string tableName, Record newRecord);
 	void deleteRecord(std::string tableName, int blocknum, int offset, int size);
 
-	Record getRecord(std::string filename, int blocknum, int offset, int size);
-	Cursor* getCursor(std::string filename, int blocknum, int offset);
+	Record getRecord(std::string tableName, int blocknum, int offset, int size);
+	Cursor getCursor(std::string tableName, int blocknum, int offset);
+
+	void newTrashCan();
+	void appendTrashCan(int blocknum, int offset);
+	void emptyTrashCan();
+	
 private:
 	BufferManager* bm;
 	catalog_manager* cm;
 	IndexManager* im;
+	std::fstream *trashFile;
 };
 
 #endif

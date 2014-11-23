@@ -5,10 +5,18 @@
 #include <cstdlib>
 
 #include "evaluator.h"
+#include "../record/RecordManager.h"
+#include "../buffer/BufferManager.h"
 
 queue<pair<stmt_type, statement *> > stmt_queue;
 catalog_manager catm("data");
 extern string base_addr;
+extern RecordManager RecordManager;
+extern BufferManager BufferManager;
+
+void create_temp_table() {
+
+}
 
 bool calc_conditions(vector<condition *> conditions, record_value c) {
     for(auto x : conditions) {

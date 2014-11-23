@@ -1,6 +1,10 @@
+#ifndef __RECORD_H__
+#define __RECORD_H__
+
 #include <vector>
-#include "../parser/stmt.h"
 #include <cstdint>
+
+#include "../parser/stmt.h"
 
 class Record {
     private:
@@ -37,3 +41,5 @@ class Record {
 			return buf.size();
 		}
 };
+
+#endif

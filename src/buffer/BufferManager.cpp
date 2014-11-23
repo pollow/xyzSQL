@@ -179,9 +179,6 @@ void BufferManager::appendTrashCan(int blocknum, int offset) {
 	(*trashFile) << blocknum << "  " << offset << "\n";
 }
 
-//void BufferManager::Init(IndexManager *im) {
-//	this->im = im;
-//}
 void BufferManager::emptyTrashCan() {
 	std::streamoff end = trashFile->tellp();
 	trashFile->seekp(0);

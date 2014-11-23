@@ -1,3 +1,5 @@
+#ifndef __CATALOG_H__
+#define __CATALOG_H__
 #include "../parser/stmt.h"
 #include <iostream>
 #include <fstream>
@@ -63,3 +65,5 @@ class catalog_manager {
         int calc_record_size( const string & );
 };
 
+
+#endif 

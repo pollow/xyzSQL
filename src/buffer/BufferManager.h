@@ -7,8 +7,6 @@
 #include "Block.h"
 #include "File.h"
 #include <iostream>
-//#include "F:\\XYH\\GitHub\\xyzSQL\\src\\index\\indexIndexManager.h"
-//#include "../index/IndexManager.h"
 
 #define BUFSIZE 16
 #define	MAXTIME 0xffffffff
@@ -44,7 +42,6 @@ class BufferManager {
 public:
 	static const std::string dataFileDir, trash;
 	BufferManager();
-//	void Init(IndexManager *im);
 	void load();
 	~BufferManager();
 	Block readBlock(std::string, int);
@@ -70,7 +67,6 @@ public:
 
 private:
 	std::fstream *trashFile;
-//	IndexManager *im;
 	std::map<std::string, File *> files;
 	std::vector<BufferRecord> bufQueue;
 	/*Block bufData[BUFSIZE];*/

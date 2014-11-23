@@ -25,7 +25,7 @@ void RecordManager::createMaster(std::string tableName) {
 
 void RecordManager::deleteRecord(std::string tableName, int blocknum, int offset, int size) {
 	std::string filename = tableName + "/" + master;
-	recordBlock r = bm->readBlock(filename, blocknum);
+	recordBlock r( bm->readBlock(filename, blocknum) );
 	r.deleteRecord(size, offset);
 	bm->writeBlock(filename, blocknum, r);
 }
@@ -93,7 +93,7 @@ Record RecordManager::getRecord(std::string tableName, int blocknum, int offset,
 	std::string filename = master + "/" + tableName;
 	auto cat = cm->exist_relation(tableName);
 	recordBlock r = bm->readBlock(filename, blocknum);
-	return Record(r.getRecord, cat->cols);
+	return Record(r.getRecord(size, offset), cat->cols);
 }
 
 RecordManager::~RecordManager() {}

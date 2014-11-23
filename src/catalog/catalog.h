@@ -63,4 +63,3 @@ class catalog_manager {
         int calc_record_size( const string & );
 };
 
-

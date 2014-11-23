@@ -40,7 +40,7 @@ public:
 
 class BufferManager {
 public:
-	static const std::string dataFileDir;
+	static const std::string dataFileDir, trash;
 	BufferManager();
 	void load();
 	~BufferManager();
@@ -66,6 +66,7 @@ public:
 	void emptyTrashCan();
 
 private:
+	std::fstream *trashFile;
 	std::map<std::string, File *> files;
 	std::vector<BufferRecord> bufQueue;
 	/*Block bufData[BUFSIZE];*/

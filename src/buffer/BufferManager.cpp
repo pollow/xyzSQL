@@ -4,6 +4,7 @@
 #include <algorithm>
 
 const std::string BufferManager::dataFileDir = "data/";
+const std::string BufferManager::trash = "trash";
 
 BufferManager::BufferManager() {
 	//load();

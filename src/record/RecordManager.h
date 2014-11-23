@@ -152,10 +152,6 @@ public:
 
 	Record getRecord(std::string tableName, int blocknum, int offset, int size);
 	Cursor getCursor(std::string tableName, int blocknum, int offset);
-
-	void newTrashCan();
-	void appendTrashCan(int blocknum, int offset);
-	void emptyTrashCan();
 	
 private:
 	BufferManager* bm;

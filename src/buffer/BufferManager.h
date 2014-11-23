@@ -60,6 +60,11 @@ public:
 		}
 		std::cout << "=======================end buffer =================\n";
 	}
+
+	void newTrashCan();
+	void appendTrashCan(int blocknum, int offset);
+	void emptyTrashCan();
+
 private:
 	std::map<std::string, File *> files;
 	std::vector<BufferRecord> bufQueue;

@@ -169,3 +169,19 @@ void BufferManager::retimeQ() {
 		i->accessTime = time++;
 	}
 }
+
+void BufferManager::newTrashCan() {
+	trashFile = new std::fstream(trash);
+}
+
+void BufferManager::appendTrashCan(int blocknum, int offset) {
+	(*trashFile) << blocknum << "  " << offset << "\n";
+}
+
+void BufferManager::emptyTrashCan() {
+	int end = trashFile->tellp();
+	trashFile->seekp(0);
+	while (trashFile->tellp() < end) {
+		//im->del....;
+	}
+}

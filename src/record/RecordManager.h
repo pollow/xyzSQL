@@ -14,9 +14,10 @@ class IndexManager;
 #include <vector>
 #include <cstdint>
 #include <fstream>
-#include "Record.h"
+#include "record.h"
 #include "../buffer/BufferManager.h"
 #include "../buffer/Block.h"
+#include "../index/IndexManager.h"
 
 class Cursor {
 public:

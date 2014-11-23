@@ -1,5 +1,6 @@
 #include <vector>
 #include "../parser/stmt.h"
+#include <cstdint>
 
 class Record {
     private:
@@ -13,4 +14,8 @@ class Record {
 
         vector<record_value> unpack( vector<table_column *> *);
         vector<unsigned char> pack( vector<table_column *> *);
+		
+		inline uint32_t size() {
+			return buf.size();
+		}
 };

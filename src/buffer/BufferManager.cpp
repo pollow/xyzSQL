@@ -4,6 +4,7 @@
 #include <algorithm>
 
 const std::string BufferManager::dataFileDir = "data/";
+const std::string BufferManager::trash = "trash.tmp";
 
 BufferManager::BufferManager() {
 	//load();
@@ -171,17 +172,21 @@ void BufferManager::retimeQ() {
 }
 
 void BufferManager::newTrashCan() {
-	trashFile = new std::fstream(trash);
+	trashFile = new std::fstream(trash, ios::in | ios::out | ios::trunc);
 }
 
 void BufferManager::appendTrashCan(int blocknum, int offset) {
 	(*trashFile) << blocknum << "  " << offset << "\n";
 }
 
+void BufferManager::Init(IndexManager *im) {
+	this->im = im;
+}
 void BufferManager::emptyTrashCan() {
 	int end = trashFile->tellp();
 	trashFile->seekp(0);
+	int b, c;
 	while (trashFile->tellp() < end) {
-		//im->del....;
+		// TODO
 	}
 }

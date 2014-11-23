@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <vector>
+#include <cassert>
+#include <sstream>
 
 using namespace std;
 
@@ -47,36 +49,128 @@ class attribute {
         
 };
 
+class record_value {
+    public:
+        uint32_t value;
+
+        record_value(uint32_t _value) : value(_value) {}
+        record_value(char *   _value) { memcpy(&value, &_value, 4); }
+        record_value(int      _value) { memcpy(&value, &_value, 4); }
+        record_value(float    _value) { memcpy(&value, &_value, 4); }
+
+        float as_float() const {
+            float tmp = 0; 
+            memcpy(&tmp, &value, 4); 
+            return tmp;
+        }
+
+        char * as_str() const {
+            char *tmp;
+            memcpy(&tmp, &value, 4); 
+            return tmp;
+        }
+
+        int as_int() const {
+            return value;
+        }
+
+        string to_str(int data_type) {
+            switch (data_type) {
+                case table_column::INTTYPE : 
+                    return (stringstream() << as_int()).str();
+                case table_column::FLOATTYPE :
+                    return (stringstream() << as_float()).str();
+                case table_column::CHARTYPE :
+                    return string(as_str());
+                default : return "";
+            }
+        }
+
+        static int compare_as_int(const record_value &a, const record_value &b) {
+            if (a.as_int() < b.as_int()) return -1;
+            else if (a.as_int() > b.as_int()) return 1;
+            else return 0;
+        }
+
+        static int compare_as_float(const record_value &a, const record_value &b) {
+            if (a.as_float() < b.as_float()) return -1;
+            else if (a.as_float() > b.as_float()) return 1;
+            else return 0;
+        }
+
+        static int compare_as_str(const record_value &a, const record_value &b) {
+            return strcmp(a.as_str(), b.as_str());
+        }
+
+        static int compare(int data_type, const record_value &a, const record_value &b) {
+            switch (data_type) {
+                case table_column::INTTYPE : 
+                    return compare_as_int(a, b); break;
+                case table_column::FLOATTYPE :
+                    return compare_as_float(a, b); break;
+                case table_column::CHARTYPE :
+                    return compare_as_str(a, b); break;
+                default : return false;
+            }
+        }
+};
 
 class condition {
     public:
         attribute *left_attr, *right_attr;
-        string str;
-        float fnum;
-        int inum;
+        // string str;
+        // float fnum;
+        // int inum;
+        record_value v;
         int op;
+        bool flag;
 
-        condition(attribute *l, attribute *r, int _op) : left_attr(l), right_attr(r), op(_op) {}
-        condition(attribute *l, float r, int _op) : left_attr(l), fnum(r), op(_op) {}
-        condition(attribute *l, int r  , int _op) : left_attr(l), inum(r), op(_op) {}
-        condition(attribute *l, string r  , int _op) : left_attr(l), str(r), op(_op) {}
+        condition(attribute *l, attribute *r,   int _op) : 
+            left_attr(l), right_attr(r), v(0), op(_op), flag(true) {}
+        condition(attribute *l, float r,        int _op) : 
+            left_attr(l), v(r), op(_op), flag(false) {}
+        condition(attribute *l, int r,          int _op) : 
+            left_attr(l), v(r), op(_op), flag(false) {}
+        condition(attribute *l, char *r,        int _op) : 
+            left_attr(l), v(r), op(_op), flag(false) {}
 
-        void calc() {
-
+        bool calc(pair<table_column *, record_value> p) {
+            assert(flag == false);
+            switch(op) {
+                case EQUALTO : 
+                    return record_value::compare(p.first->data_type, v, p.second) == 0;
+                case GREATERTHAN :
+                    return record_value::compare(p.first->data_type, v, p.second) > 0;
+                case LESSTHAN :
+                    return record_value::compare(p.first->data_type, v, p.second) < 0;
+                case GREATER_EQUAL :
+                    return record_value::compare(p.first->data_type, v, p.second) >= 0;
+                case LESS_EQUAL :
+                    return record_value::compare(p.first->data_type, v, p.second) <= 0;
+                case NOT_EQUAL :
+                    return record_value::compare(p.first->data_type, v, p.second) != 0;
+                default : 
+                    return false;
+            }
         }
+
+        static const int EQUALTO = 1, GREATERTHAN = 2, LESSTHAN = 3, GREATER_EQUAL = 4, LESS_EQUAL = 5, NOT_EQUAL = 6;
 };
 
 class algbric_node {
     public:
         int op;
         bool flag;
-        void *left, *right; 
+        algbric_node *left, *right; 
         string *table;
         vector<condition *> conditions;
+        vector<attribute *> *projection_list; 
 
         algbric_node(int _op) : op(_op) { flag = false; }
 
         static const int DIRECT = 0, PROJECTION = 1, SELECTION = 2, JOIN = 3, PRODUCTION = 4;
+
+        void calc() {}
 };
 
 class statement {
@@ -91,7 +185,6 @@ class select_stmt : public statement {
         vector<attribute *> *projection_list; 
         vector<string *> *table_list;
         vector<condition *> *condition_list;
-        algbric_node *root;
 
         select_stmt(vector<attribute *> *pl, vector<string *> *tl, vector<condition *> *cl) : 
             statement(), projection_list(pl), table_list(tl), condition_list(cl) {}
@@ -150,31 +243,6 @@ class create_index_stmt : public statement {
 
 };
 
-class record_value {
-    public:
-        uint32_t value;
-
-        record_value(uint32_t _value) : value(_value) {}
-        record_value(char *   _value) { memcpy(&value, &_value, 4); }
-        record_value(int      _value) { memcpy(&value, &_value, 4); }
-        record_value(float    _value) { memcpy(&value, &_value, 4); }
-
-        float as_float() {
-            float tmp = 0; 
-            memcpy(&tmp, &value, 4); 
-            return tmp;
-        }
-
-        char * as_str() {
-            char *tmp;
-            memcpy(&tmp, &value, 4); 
-            return tmp;
-        }
-
-        int as_int() {
-            return value;
-        }
-};
 
 class insert_stmt : public statement {
     public:

@@ -29,6 +29,30 @@ void catalog::write_back(const string &addr) {
     out.close();
 }
 
+table_column *catalog::get_column(const string &attr_name) {
+    for(auto x : *cols) {
+        if (x->name == attr_name) return x;
+    }
+
+    return NULL;
+}
+
+bool catalog::is_unique(const string &attr_name) {
+    for(auto x : *cols) {
+        if (x->name == attr_name) return x->flag & table_column::unique_attr;
+    }
+
+    return false;
+}
+
+string catalog::get_primary() {
+    for(auto x : *cols) {
+        if (x->flag & table_column::primary_attr) return x->name;
+    }
+
+    return "";
+}
+
 const string &catalog::get_name() {
     return name;
 }
@@ -84,3 +108,14 @@ void catalog_manager::write_back() {
     out.close();
 }
 
+table_column *catalog_manager::get_column(attribute *t) {
+    return exist_relation(t->relation_name)->get_column(t->attribute_name);
+}
+
+bool catalog_manager::is_unique(attribute *t) {
+    return exist_relation(t->relation_name)->is_unique(t->attribute_name);
+}
+
+string catalog_manager::get_primary(const string &rel_name) {
+    return exist_relation(rel_name)->get_primary();
+}

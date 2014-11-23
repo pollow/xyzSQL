@@ -6,9 +6,9 @@
 class catalog {
     private:
         string name;
-        vector<table_column *> *cols;
 
     public:
+        vector<table_column *> *cols;
 
         catalog(const char *_name, vector<table_column *> *_cols) : 
             name(_name), cols(_cols) {}
@@ -21,6 +21,13 @@ class catalog {
         const string &get_name();
         
         void write_back(const string &);
+
+        table_column *get_column(const string &attr_name);
+
+        bool is_unique(const string &);
+
+        string get_primary();
+
 };
 
 class catalog_manager {
@@ -37,5 +44,10 @@ class catalog_manager {
 
         void write_back();
 
+        table_column *get_column(attribute *t);
+
+        bool is_unique(attribute *t);
+
+        string get_primary(const string &);
 };
 

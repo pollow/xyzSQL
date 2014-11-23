@@ -29,3 +29,11 @@
 
 # Vim swap file
 *.swp
+
+# Visual studio project files
+*.vcxproj
+*.vcxproj.filters
+*Debug/
+
+# Buffer Manager test files
+src/buffer/data/

@@ -2,18 +2,13 @@
 #ifndef __RECORD_MANAGER_H__
 #define __RECORD_MANAGER_H__
 
-#ifdef GNNNG_CUSTOM
-class IndexManager;
-
-#else
-#include "../catalog/catalog.h"
+#include "record.h"
+//#include "../catalog/catalog.h"
 #include "../parser/stmt.h"
-#endif
 
 #include <vector>
 #include <cstdint>
 #include <fstream>
-#include "record.h"
 #include "../buffer/BufferManager.h"
 #include "../buffer/Block.h"
 #include "../index/IndexManager.h"
@@ -34,7 +29,7 @@ public:
 
 	}
 
-	recordBlock(Block& b) : Block(b) {
+	recordBlock(const Block& b) : Block(b) {
 	};
 
 	void Init(int size) {
@@ -136,9 +131,6 @@ private:
 //	}
 //};
 
-class IndexManager {
-
-};
 
 class RecordManager {
 public:

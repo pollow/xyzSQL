@@ -172,16 +172,17 @@ void BufferManager::retimeQ() {
 }
 
 void BufferManager::newTrashCan() {
-	trashFile = new std::fstream(trash, ios::in | ios::out | ios::trunc);
+	trashFile = new std::fstream(trash, std::ios::in | std::ios::out | std::ios::trunc);
 }
 
 void BufferManager::appendTrashCan(int blocknum, int offset) {
 	(*trashFile) << blocknum << "  " << offset << "\n";
 }
 
-void BufferManager::Init(IndexManager *im) {
-	this->im = im;
-}
+// void BufferManager::Init(IndexManager *im) {
+// 	this->im = im;
+// }
+ 
 void BufferManager::emptyTrashCan() {
 	std::streamoff end = trashFile->tellp();
 	trashFile->seekp(0);

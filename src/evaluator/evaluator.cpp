@@ -1,19 +1,8 @@
-#include <readline/readline.h>
-#include <readline/history.h>
-#include <iostream>
-#include <cctype>
-#include <set>
-#include <cstdlib>
-#include <uuid/uuid.h>
-#include <sstream>
 
 #include "evaluator.h"
-#include "../record/RecordManager.h"
-#include "../buffer/BufferManager.h"
-#include "../index/IndexManager.h"
 
 queue<pair<stmt_type, statement *> > stmt_queue;
-catalog_manager catm("data");
+extern catalog_manager catm;
 extern string base_addr;
 extern RecordManager RecordManager;
 extern BufferManager BufferManager;
@@ -135,6 +124,10 @@ void xyzsql_emit_stmt(stmt_type t, statement *stmt) {
 
 void xyzsql_batch() {
     cout << "batch!" << endl;
+}
+
+void xyzsql_finalize() {
+
 }
 
 void xyzsql_exit() {

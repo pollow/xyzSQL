@@ -5,6 +5,7 @@
 #include <set>
 #include <cstdlib>
 #include <uuid/uuid.h>
+#include <sstream>
 
 #include "evaluator.h"
 #include "../record/RecordManager.h"
@@ -31,45 +32,100 @@ string create_temp_table(vector<table_column *> *t) {
     return string(uuid_str);
 }
 
-bool calc_conditions(vector<condition *> *conditions, record_value c) {
+bool calc_conditions(vector<condition *> *conditions, Record &c) {
     for(auto x : *conditions) {
-        if (x->calc( {catm.get_column(x->left_attr), c} ) == false) 
+        auto col = catm.get_column(x->left_attr);
+        if (x->calc( {col, c.get_value(col)} ) == false) 
             return false;
     }
     return true;
 }
 
 void calc_algric_tree(algbric_node *root) {
+    string table_name;
+    int b = 0, c = 0;
+    auto new_col_list = new vector<table_column *>;
+    auto old_col_list = catm.exist_relation((root->left->table))->cols;
+
     switch ( root->op ) {
         case algbric_node::DIRECT :
             root->flag = true;
             return;
-        case algbric_node::PROJECTION :
-            auto tmp = new vector<table_column *>;
+        case algbric_node::PROJECTION : 
+        {
+
             for( auto x : *(root->projection_list) ) {
                 auto att = catm.exist_relation(x->relation_name)->get_column(x->relation_name);
-                tmp->push_back(new table_column(x->full_name.c_str(), att->data_type, att->str_len, 0 ));
+                new_col_list->push_back(new table_column(x->full_name.c_str(), att->data_type, att->str_len, 0 ));
             }
-            string table_name = create_temp_table(tmp);
+            table_name = create_temp_table(new_col_list);
 
-            indexIterator a;
-            IndexManager.getStarter(a, base_addr + s->table_name + "/index_" + catm.get_primary(s->table_name) + ".db");
-            int b = 0, c = 0;
-            while (a.next(b, c) == 0) {
-                Record a = RecordManager.getRecord(table_name, b, c, catm.calc_record_size(table_name));
-                auto z = catm.exist_relation(table_name);
-                auto x = a.unpack(z->cols);
+            indexIterator cursor;
+            IndexManager.getStarter(cursor, base_addr + (root->left->table) + "/index_" + catm.get_primary(table_name) + ".db");
+            while (cursor.next(b, c) == 0) {
+                Record a = RecordManager.getRecord(table_name, b, c, 0);
                 vector<record_value> result;
-                for(auto i = tmp->begin(); i != tmp->end(); i++) {
-                    for(auto j = z->cols->begin(); j != z->cols->end(); j++ ) {
+                for(auto i = new_col_list->begin(); i != new_col_list->end(); i++) {
+                    for(auto j = old_col_list->begin(); j != old_col_list->end(); j++ ) {
                         if ( (*i)->name == (*j)->name ) {
-                            result.push_back(x[j-z->cols->begin()]);
-                            // RecordManager.insert(table_name, Record(result));
+                            result.push_back(a.values[j-old_col_list->begin()]);
                         }
                     }
                 }
+                RecordManager.insertRecord(table_name, Record(result, new_col_list));
             }
-            
+            return;
+        }
+        case algbric_node::SELECTION : 
+        {
+            table_name = create_temp_table(catm.exist_relation(root->left->table)->cols);
+            root->table = table_name;
+
+            condition *p = NULL, *eq = NULL;
+            for(auto x : (root->conditions)) {
+                if ( catm.is_unique(x->left_attr) ) {
+                    p = x;
+                    if (x->op == condition::EQUALTO) 
+                        eq = x;
+                }
+            }
+
+            if ( eq != NULL ) p = eq;
+
+            if ( p != NULL ) {
+                auto t = p->left_attr;
+                indexIterator cursor;
+                int asdf = IndexManager.selectNode(cursor, base_addr + t->relation_name + "/index_" + t->attribute_name + ".db", 
+                        p->op, (p->v).to_str(catm.get_data_type(t)));
+                if ( asdf == 1 ) {
+                    int b = 0, c = 0;
+                    while (cursor.next(b, c) == 0) {
+                        Record a = RecordManager.getRecord(t->relation_name, b, c, 0);
+                        if (calc_conditions(&(root->conditions), a))
+                            RecordManager.insertRecord(table_name, a);
+                    }
+                }
+            } else {
+                auto t = p->left_attr;
+                indexIterator cursor;
+                int asdf = IndexManager.getStarter(cursor, base_addr + t->relation_name + "/index_" + catm.get_primary(table_name) + ".db");
+                if ( asdf == 1 ) {
+                    int b = 0, c = 0;
+                    while (cursor.next(b, c) == 0) {
+                        Record a = RecordManager.getRecord(t->relation_name, b, c, 0);
+                        if (calc_conditions(&(root->conditions), a))
+                            RecordManager.insertRecord(table_name, a);
+                    }
+                }
+            }
+
+            root->flag = true;
+            return;
+        }
+        case algbric_node::JOIN :
+        {
+
+        }
     }
 }
 
@@ -113,14 +169,14 @@ void xyzsql_process_select() {
     auto s = dynamic_cast<select_stmt *>(stmt_queue.front().second);
 
     // checker
-    
+
 
     // push selection
     vector< algbric_node * > leaf_nodes;
     for(auto x : *(s->table_list)) {
         // add to select queue
         algbric_node *direct = new algbric_node(algbric_node::DIRECT);
-        direct->table = x;
+        direct->table = *x;
         algbric_node *select = new algbric_node(algbric_node::SELECTION);
         for ( auto y : *(s->condition_list) ) {
             if ( y->flag == false && y->left_attr->relation_name == *(x) ) {
@@ -136,19 +192,19 @@ void xyzsql_process_select() {
             leaf_nodes.push_back(select);
         }
     }
-    
+
     algbric_node *root = NULL;
     set<string> rel_set;
     while (!leaf_nodes.empty()) {
         int tmp = 0xFFFFFF;
         auto label = leaf_nodes.begin(); 
         for(auto i = leaf_nodes.begin(); i != leaf_nodes.end(); i++) {
-            if ( catm.get_size(*((*i)->table)) < tmp ) {
-                tmp = catm.get_size(*((*i)->table));
+            if ( catm.get_size(((*i)->table)) < tmp ) {
+                tmp = catm.get_size(((*i)->table));
                 label = i;
             }
         }
-        
+
         if (root == NULL) {
             root = new algbric_node(algbric_node::JOIN);
             root->left = *label;
@@ -157,20 +213,20 @@ void xyzsql_process_select() {
             for(auto x : *(s->condition_list)) {
                 if (x->flag == true) {
                     if (
-                            (rel_set.count(x->left_attr->relation_name) && *(root->right->table) == x->right_attr->relation_name) || 
-                            (rel_set.count(x->right_attr->relation_name) && *(root->right->table) == x->left_attr->relation_name) ) {
+                            (rel_set.count(x->left_attr->relation_name) && (root->right->table) == x->right_attr->relation_name) || 
+                            (rel_set.count(x->right_attr->relation_name) && (root->right->table) == x->left_attr->relation_name) ) {
 
                         root->conditions.push_back(x);
                     }
                 }
             }
 
-            rel_set.insert(*(root->right->left->table));
+            rel_set.insert((root->right->left->table));
 
             auto tmp = new algbric_node(algbric_node::JOIN);
             tmp->left = root;
             root = tmp;
-            
+
             leaf_nodes.erase(label);
         }
     }
@@ -238,32 +294,32 @@ void xyzsql_process_delete() {
                     eq = x;
             }
         }
-        
+
         if ( eq != NULL || p != NULL ) {
             // use index
             auto t = eq == NULL ? p->left_attr : eq->left_attr;
+            if (eq != NULL) p = eq;
             indexIterator a;
-            int asdf = IndexManager.selectNode(a, base_addr + t->relation_name + "/index_" + t->attribute_name + ".db", "1", "1.1");
-            int b = 0, c = 0;
-            while (a.next(b, c) == 0) {
-                Record a = RecordManager.getRecord(t->relation_name, b, c);
-                auto z = catm.exist_relation(t->relation_name);
-                auto x = a.unpack(z->cols);
-                record_value y = x[z->get_pos(t->attribute_name)];
-                if (calc_conditions(s->condition_list, y))
-                    BufferManager.appendTrashCan(b, c);
+            int asdf = IndexManager.selectNode(a, base_addr + t->relation_name + "/index_" + t->attribute_name + ".db", 
+                    p->op, (p->v).to_str(catm.get_data_type(t)));
+            if ( asdf == 1 ) {
+                int b = 0, c = 0;
+                while (a.next(b, c) == 0) {
+                    Record a = RecordManager.getRecord(t->relation_name, b, c, 0);
+                    if (calc_conditions(s->condition_list, a))
+                        BufferManager.appendTrashCan(b, c);
+                }
             }
         } else {
             indexIterator a;
-            IndexManager.getStarter(a, base_addr + s->table_name + "/index_" + catm.get_primary(s->table_name) + ".db");
-            int b = 0, c = 0;
-            while (a.next(b, c) == 0) {
-                Record a = RecordManager.getRecord(s->table_name, b, c);
-                auto z = catm.exist_relation(s->table_name);
-                auto x = a.unpack(z->cols);
-                record_value y = x[z->get_pos(s->table_name)];
-                if (calc_conditions(s->condition_list, y))
-                    BufferManager.appendTrashCan(b, c);
+            int asdf = IndexManager.getStarter(a, base_addr + s->table_name + "/index_" + catm.get_primary(s->table_name) + ".db");
+            if (asdf == 1) {
+                int b = 0, c = 0;
+                while (a.next(b, c) == 0) {
+                    Record a = RecordManager.getRecord(s->table_name, b, c, 0);
+                    if (calc_conditions(s->condition_list, a))
+                        BufferManager.appendTrashCan(b, c);
+                }
             }
         }
         BufferManager.emptyTrashCan();
@@ -275,7 +331,7 @@ void xyzsql_process_insert(insert_stmt *s ) {
     if ( s == NULL )
         s = dynamic_cast<insert_stmt *>(stmt_queue.front().second);
 
-    // RecordManager.insert(s->table_name, Record(s->values));
+    // RecordManager.insertRecord(s->table_name, Record(s->values));
     cout << "record inserted." << endl;
 }
 

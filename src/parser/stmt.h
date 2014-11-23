@@ -162,7 +162,7 @@ class algbric_node {
         int op;
         bool flag;
         algbric_node *left, *right; 
-        string *table;
+        string table;
         vector<condition *> conditions;
         vector<attribute *> *projection_list; 
 

@@ -14,9 +14,10 @@ class IndexManager;
 #include <vector>
 #include <cstdint>
 #include <fstream>
-#include "Record.h"
+#include "record.h"
 #include "../buffer/BufferManager.h"
 #include "../buffer/Block.h"
+#include "../index/IndexManager.h"
 
 class Cursor {
 public:
@@ -72,7 +73,7 @@ public:
 			*reinterpret_cast<std::uint32_t *>(headOfRecord) = 0xffffffff;
 			headOfRecord += 4;
 			for (i = 0; i < r.size(); i++) {
-				*reinterpret_cast<unsigned char *>(headOfRecord + i) = r.data[i];
+				*reinterpret_cast<unsigned char *>(headOfRecord + i) = r.buf[i];
 			}
 			ret = true;
 		}
@@ -95,12 +96,14 @@ public:
 			throw std::exception("Record Manager: the record has been deleted");
 		}
 #endif
-		Record x;
+		std::vector<unsigned char> x;
 		headOfRecord += 4;
+
 		for (auto i = 0; i < size; i++) {
-			x.data[i] = *reinterpret_cast<unsigned char *>(headOfRecord + i);
+			x.push_back(*reinterpret_cast<unsigned char *>(headOfRecord + i));
 		}
-		return x;
+
+		return Record(x);
 	}
 
 	std::uint32_t getFreelist() {

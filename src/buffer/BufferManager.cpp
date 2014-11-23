@@ -47,7 +47,7 @@ BufferRecord *BufferManager::findQ(std::string filename, int index) {
 			br = &(*i);
 			//i->accessTime++; wrong
 			i->accessTime = time;
-			std::cout << filename << " " << index << " " << "hit" << std::endl;
+		//	std::cout << filename << " " << index << " " << "hit" << std::endl;
 			break;
 		}
 	}

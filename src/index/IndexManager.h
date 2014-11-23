@@ -317,6 +317,9 @@ public:
 			tmpBlock=myBufferManager->readBlock(fileName,0);
 			tmpBlock2=myBufferManager->readBlock(fileName,1);
 			myAnalyzer=new blockAnalyzer(tmpBlock,tmpBlock2,myBufferManager);
+
+			cout<<"maybe"<<endl;
+			getchar();
 		}
 		int32_t blockPos=myAnalyzer->getRootPosition();
 		myQueue.push(blockPos);
@@ -337,6 +340,8 @@ public:
 			if(!tmpNode->isLeaf())
 				for(int32_t j=0;j<=tmpNode->getKeyNumber();j++)
 					myQueue.push(tmpNode->getChild(j));
+			//cout<<"round"<<endl;
+			//getchar();
 
 		}
 

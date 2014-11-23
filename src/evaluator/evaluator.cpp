@@ -18,6 +18,7 @@ extern RecordManager RecordManager;
 extern BufferManager BufferManager;
 extern IndexManager IndexManager;
 
+
 string create_temp_table(vector<table_column *> *t) {
     uuid_t out;
     uuid_string_t uuid_str;
@@ -36,6 +37,32 @@ bool calc_conditions(vector<condition *> *conditions, record_value c) {
             return false;
     }
     return true;
+}
+
+void calc_algric_tree(algbric_node *root) {
+    switch ( root->op ) {
+        case algbric_node::DIRECT :
+            root->flag = true;
+            return;
+        case algbric_node::PROJECTION :
+            auto tmp = new vector<table_column *>;
+            for( auto x : *(root->projection_list) ) {
+                auto att = catm.exist_relation(x->relation_name)->get_column(x->relation_name);
+                tmp->push_back(new table_column(x->full_name.c_str(), att->data_type, att->str_len, 0 ));
+            }
+            string table_name = create_temp_table(tmp);
+
+            indexIterator a;
+            IndexManager.getStarter(a, base_addr + s->table_name + "/index_" + catm.get_primary(s->table_name) + ".db");
+            int b = 0, c = 0;
+            while (a.next(b, c) == 0) {
+                Record a = RecordManager.getRecord(table_name, b, c, catm.calc_record_size(table_name));
+                auto z = catm.exist_relation(table_name);
+                auto x = a.unpack(z->cols);
+                record_value y = x[z->get_pos(table_name)];
+            }
+            
+    }
 }
 
 void xyzsql_emit_stmt(stmt_type t, statement *stmt) {
@@ -97,7 +124,7 @@ void xyzsql_process_select() {
             delete select;
         } else {
             select->left = direct;
-            select->calc();
+            calc_algric_tree(select);
             leaf_nodes.push_back(select);
         }
     }
@@ -135,6 +162,8 @@ void xyzsql_process_select() {
             auto tmp = new algbric_node(algbric_node::JOIN);
             tmp->left = root;
             root = tmp;
+            
+            leaf_nodes.erase(label);
         }
     }
 
@@ -171,7 +200,7 @@ void xyzsql_process_select() {
     //     cursor->right = NULL;
     // }
 
-    root->calc();
+    calc_algric_tree(root);
 }
 
 void xyzsql_process_drop_table() {

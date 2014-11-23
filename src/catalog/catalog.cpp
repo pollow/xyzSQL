@@ -142,3 +142,15 @@ string catalog_manager::get_primary(const string &rel_name) {
 int catalog_manager::get_size(const string &rel_name) {
     return exist_relation(rel_name)->get_size();
 }
+
+int catalog_manager::get_data_type(const attribute *t) {
+    return exist_relation(t->relation_name)->get_column(t->attribute_name)->data_type;
+}
+
+int catalog_manager::calc_record_size(const string &rel_name ) {
+    auto t = exist_relation(rel_name);
+    int c = 0;
+    for( auto x : *(t->cols) ) { 
+        c += x->str_len;
+    }
+}

@@ -107,7 +107,7 @@ column_atts :               { $$ = 0; cout << "No Attribute." << endl; }
             | UNIQUE        { $$ = table_column::unique_attr; cout << "UNIQUE" << endl; }
 ;
 
-opt_length  :                   { $$ = 0; }
+opt_length  :                   { $$ = 4; }
             | '(' INTNUM ')'    { $$ = $2; }
 
 create_def  : NAME data_type opt_length column_atts     { $$ = new table_column($1, $2, $3, $4); cout << "This column is: " << $1 << " " << $2 << " " << $3 << endl; }

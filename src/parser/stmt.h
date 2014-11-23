@@ -169,8 +169,6 @@ class algbric_node {
         algbric_node(int _op) : op(_op) { flag = false; }
 
         static const int DIRECT = 0, PROJECTION = 1, SELECTION = 2, JOIN = 3, PRODUCTION = 4;
-
-        void calc() {}
 };
 
 class statement {

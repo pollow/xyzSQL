@@ -57,5 +57,10 @@ class catalog_manager {
         string get_primary(const string &);
 
         int get_size( const string & );
+
+        int get_data_type( const attribute * );
+
+        int calc_record_size( const string & );
 };
+
 

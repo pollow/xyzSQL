@@ -62,10 +62,10 @@ int main()
 //	for(int i=0;i<MAX/2;i++)
 //			cout<<dvalue[i]<<endl;
 	i.createIndex("abc.db","char",200,MAX,value,block,offset);
-//	for(int j=0;j<MAX/2;j++){
-//		cout<<"delete:"<<dvalue[j]<<endl;
-//		i.deleteNode("abc.db",dvalue[j]);
-	//i.print("abc.db");
+	for(int j=0;j<MAX/2;j++){
+		cout<<"delete:"<<dvalue[j]<<endl;
+		i.deleteNode("abc.db",dvalue[j]);
+	i.print("abc.db");}
 //	while(true){
 //		string str;
 //		cout<<"please input:";

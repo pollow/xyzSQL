@@ -1,9 +1,10 @@
 #include "record.h"
 #include <cassert>
 
-vector<record_value> Record::unpack( vector<table_column *> *t) {
-    vector<record_value> result;
+void Record::unpack() {
+    vector<record_value> &result = values;
     
+    auto t = table_info;
     auto j = buf.begin();
     for( auto i = t->begin(); i != t->end(); i++, j++) {
         int a;
@@ -28,15 +29,15 @@ vector<record_value> Record::unpack( vector<table_column *> *t) {
                 break;
         }
     }
-
-    return result;
 }
 
-vector<unsigned char> Record::pack( vector<table_column *> *t ) {
+void Record::pack() {
     vector<unsigned char> result;
     string tmp;
 
-    auto j = values->begin();
+    auto t = table_info;
+    auto j = values.begin();
+
     for( auto i = t->begin(); i != t->end(); i++, j++) {
         switch((*i)->data_type) {
             case table_column::INTTYPE : 
@@ -52,7 +53,5 @@ vector<unsigned char> Record::pack( vector<table_column *> *t ) {
     }
 
     result.assign(tmp.begin(), tmp.end());
-
-    return result;
 }
 

@@ -91,9 +91,9 @@ void RecordManager::insertRecord(std::string tableName, Record newRecord) {
 
 Record RecordManager::getRecord(std::string tableName, int blocknum, int offset, int size) {
 	std::string filename = master + "/" + tableName;
+	auto cat = cm->exist_relation(tableName);
 	recordBlock r = bm->readBlock(filename, blocknum);
-	return r.getRecord(size, offset);
+	return Record(r.getRecord, cat->cols);
 }
-
 
 RecordManager::~RecordManager() {}

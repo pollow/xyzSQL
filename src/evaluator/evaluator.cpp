@@ -59,7 +59,15 @@ void calc_algric_tree(algbric_node *root) {
                 Record a = RecordManager.getRecord(table_name, b, c, catm.calc_record_size(table_name));
                 auto z = catm.exist_relation(table_name);
                 auto x = a.unpack(z->cols);
-                record_value y = x[z->get_pos(table_name)];
+                vector<record_value> result;
+                for(auto i = tmp->begin(); i != tmp->end(); i++) {
+                    for(auto j = z->cols->begin(); j != z->cols->end(); j++ ) {
+                        if ( (*i)->name == (*j)->name ) {
+                            result.push_back(x[j-z->cols->begin()]);
+                            // RecordManager.insert(table_name, Record(result));
+                        }
+                    }
+                }
             }
             
     }
@@ -132,10 +140,10 @@ void xyzsql_process_select() {
     algbric_node *root = NULL;
     set<string> rel_set;
     while (!leaf_nodes.empty()) {
-        unsigned int tmp = -1;
+        int tmp = 0xFFFFFF;
         auto label = leaf_nodes.begin(); 
         for(auto i = leaf_nodes.begin(); i != leaf_nodes.end(); i++) {
-            if ( catm.get_size((*i)->table) < tmp ) {
+            if ( catm.get_size(*((*i)->table)) < tmp ) {
                 tmp = catm.get_size(*((*i)->table));
                 label = i;
             }

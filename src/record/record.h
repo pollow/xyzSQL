@@ -4,18 +4,35 @@
 
 class Record {
     private:
-        vector<record_value> *values;
-        
+        void unpack();
+        void pack();
 
     public:
 		vector<unsigned char> buf;
-		Record() { };
-        Record( vector<record_value> *t ) : values(t) { }
-        Record( const vector<unsigned char> &tmp ) : buf(tmp) {  };
+        vector<record_value> values;
+        vector<table_column *> *table_info;
 
-        vector<record_value> unpack( vector<table_column *> *);
-        vector<unsigned char> pack( vector<table_column *> *);
-		
+		Record() { };
+
+        Record( vector<record_value> &t, vector<table_column *> *col ) : values(t), table_info(col) {
+            pack();
+        }
+
+        Record( const vector<unsigned char> &tmp, vector<table_column *> *col ) : buf(tmp), table_info(col) {
+            unpack();
+        };
+
+        record_value get_value(table_column *t) {
+            for(auto x = table_info->begin(); x != table_info->end(); x++) {
+                if ((*x)->name == t->name) {
+                    return values[x-table_info->begin()];
+                }
+            }
+
+            // should never reached here.
+            return record_value(0);
+        }
+
 		inline uint32_t size() {
 			return buf.size();
 		}

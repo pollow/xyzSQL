@@ -3,7 +3,6 @@
 #define __RECORD_MANAGER_H__
 
 #ifdef GNNNG_CUSTOM
-class catalog_manager;
 class IndexManager;
 
 #else
@@ -18,6 +17,7 @@ class IndexManager;
 #include "../buffer/BufferManager.h"
 #include "../buffer/Block.h"
 #include "../index/IndexManager.h"
+#include "../catalog/catalog.h"
 
 class Cursor {
 public:
@@ -89,7 +89,7 @@ public:
 		*reinterpret_cast<std::uint32_t *>(headOfRecord) = next;
 	}
 	    
-	Record getRecord(int size, int offset) {
+	std::vector<unsigned char> getRecord(int size, int offset) {
 		char * headOfRecord = this->dataPointer() + offset;
 #ifdef CAN_THROW
 		if (*reinterpret_cast<std::uint32_t *>(headOfRecord) < 0xffffffff) {
@@ -103,7 +103,7 @@ public:
 			x.push_back(*reinterpret_cast<unsigned char *>(headOfRecord + i));
 		}
 
-		return Record(x);
+		return x;
 	}
 
 	std::uint32_t getFreelist() {

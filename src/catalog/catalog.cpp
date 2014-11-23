@@ -45,6 +45,15 @@ bool catalog::is_unique(const string &attr_name) {
     return false;
 }
 
+void catalog::set_size(int _count) {
+    count = _count;
+}
+
+int catalog::get_size() {
+    return count;
+}
+
+
 string catalog::get_primary() {
     for(auto x : *cols) {
         if (x->flag & table_column::primary_attr) return x->name;
@@ -55,6 +64,13 @@ string catalog::get_primary() {
 
 const string &catalog::get_name() {
     return name;
+}
+
+int catalog::get_pos(const string &attr_name) {
+    for(auto i = cols->begin(); i != cols->end(); i++) 
+        if ((*i)->name == attr_name) return (i-cols->begin());
+
+    return -1;
 }
 
 catalog_manager::catalog_manager(const string &_base_addr) 
@@ -69,6 +85,9 @@ catalog_manager::catalog_manager(const string &_base_addr)
             string tmp;
             in >> tmp;
             relations[tmp] = new catalog(base_addr + tmp + "/catalog");
+            int count;
+            in >> count;
+            relations[tmp]->set_size(count);
         }
     }
 
@@ -101,7 +120,7 @@ void catalog_manager::write_back() {
     ofstream out(base_addr + "/catalog");
 
     for ( auto x : relations ) {
-        out << x.first << endl;
+        out << x.first << " " << x.second->get_size() << endl;
         x.second->write_back(base_addr + x.second->get_name());
     }
 
@@ -118,4 +137,8 @@ bool catalog_manager::is_unique(attribute *t) {
 
 string catalog_manager::get_primary(const string &rel_name) {
     return exist_relation(rel_name)->get_primary();
+}
+
+int catalog_manager::get_size(const string &rel_name) {
+    return exist_relation(rel_name)->get_size();
 }

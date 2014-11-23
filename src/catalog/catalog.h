@@ -6,6 +6,7 @@
 class catalog {
     private:
         string name;
+        int count = 0;
 
     public:
         vector<table_column *> *cols;
@@ -28,6 +29,11 @@ class catalog {
 
         string get_primary();
 
+        int get_pos(const string &);
+
+        int get_size();
+
+        void set_size(int);
 };
 
 class catalog_manager {
@@ -49,5 +55,7 @@ class catalog_manager {
         bool is_unique(attribute *t);
 
         string get_primary(const string &);
+
+        int get_size( const string & );
 };
 

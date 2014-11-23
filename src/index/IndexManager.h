@@ -358,12 +358,12 @@ private:
 class indexIterator
 {
 public:
-	indexIterator(string f,BufferManager* b,treeNode* t,int32_t it){
-		node=t;
-		fileName=f;
-		myBufferManager=b;
-		i=it;
-	}
+	// indexIterator(string f,BufferManager* b,treeNode* t,int32_t it){
+	// 	node=t;
+	// 	fileName=f;
+	// 	myBufferManager=b;
+	// 	i=it;
+	// }
 	~indexIterator(){}
 	int next(int32_t& t1,int32_t& t2)
 	{

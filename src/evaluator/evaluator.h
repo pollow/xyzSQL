@@ -11,7 +11,7 @@ void xyzsql_batch() ;
 
 void xyzsql_exit() ;
 
-void xyzsql_process_create_table() ;
+void xyzsql_process_create_table(create_table_stmt *s = NULL) ;
 
 void xyzsql_process_create_index() ;
 
@@ -29,7 +29,7 @@ void xyzsql_process_rollback() ;
 
 void xyzsql_process_delete() ;
 
-void xyzsql_process_insert() ;
+void xyzsql_process_insert(insert_stmt *s = NULL);
 
 void xyzsql_unknown_stmt() ;
 

@@ -1011,7 +1011,7 @@ int treeNode::deleteElement(blockAnalyzer* analyzer,string fileName,string value
 }
 
 
-int IndexManager::selectNode(indexIterator &iterator,string fileName, string condType ,string condition)
+int IndexManager::selectNode(indexIterator &iterator,string fileName, int condType ,string condition)
 {
 	int result;
 	Block tmpBlock;
@@ -1034,6 +1034,7 @@ int IndexManager::selectNode(indexIterator &iterator,string fileName, string con
 	blockPos1=myAnalyzer->getRootPosition();
 	tmpBlock=myBufferManager->readBlock(fileName,blockPos1);//得到root所在的Block
 	currentNode=new treeNode(myBufferManager,tmpBlock);//用Block还原出root
+
 	if(condType=="<="||condType=="<")//where的条件为小于或小于等于
 		result=currentNode->getLeftestLeaf(iterator,fileName);
 	else

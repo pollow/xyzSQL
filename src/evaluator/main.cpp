@@ -34,10 +34,16 @@ int main() {
 
     system_init();
 
-    while(true) {
-        char * line = readline(">>> ");
-        add_history(line);
+    int ii = 10;
 
+    while(ii < 1200) {
+        // char * line = readline(">>> ");
+        // add_history(line);
+
+        string tmp1("insert into q values ("), ddd;
+
+        ddd = tmp1 + (stringstream() << ii).str() + ");";
+        const char * line = ddd.c_str();
         int len = strlen(line);
         // for (int i = 0; i < len; i++) line[i] = toupper(line[i]);
         cout << "What you typed: " << line << endl;
@@ -96,6 +102,7 @@ int main() {
             BufferManager.printQ();
             BufferManager.flushQ();
 
+            ii++;
         }
     }
 

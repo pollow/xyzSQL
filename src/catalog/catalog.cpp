@@ -4,6 +4,8 @@
 
 catalog::catalog(const string &_name) {
     ifstream in(_name);
+    
+    cols = new vector<table_column *>;
 
     in >> name;
     while(in) {

@@ -4,7 +4,7 @@
 
 
 #include "record.h"
-//#include "../catalog/catalog.h"
+#include "../catalog/catalog.h"
 #include "../parser/stmt.h"
 
 #include <vector>

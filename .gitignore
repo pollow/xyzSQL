@@ -37,3 +37,8 @@
 
 # Buffer Manager test files
 src/buffer/data/
+
+# data file
+data/*
+main.dSYM/*
+main

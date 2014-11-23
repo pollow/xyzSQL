@@ -23,7 +23,6 @@ enum stmt_type {
     _exefile_stmt
 };
 
-
 class table_column {
     public:
         static const int INTTYPE = 0, FLOATTYPE = 1, CHARTYPE = 2;
@@ -36,6 +35,7 @@ class table_column {
             name(_name), data_type(_data_type), str_len(_str_len), flag(_flag) {}
 };
 
+string data_type_to_str(int data_type);
 
 class attribute {
     public:

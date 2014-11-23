@@ -1,5 +1,14 @@
 #include "stmt.h"
 
+string data_type_to_str(int data_type) {
+    switch (data_type) {
+        case table_column::INTTYPE : return "int";
+        case table_column::FLOATTYPE: return "float";
+        case table_column::CHARTYPE : return "char";
+        default : return "";
+    }
+} 
+
 float record_value::as_float() const {
     float tmp = 0; 
     memcpy(&tmp, &value, 4); 

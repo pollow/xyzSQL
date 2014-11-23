@@ -37,6 +37,17 @@ class Record {
             return record_value(0);
         }
 
+        record_value get_value(const string t) {
+            for(auto x = table_info->begin(); x != table_info->end(); x++) {
+                if ((*x)->name == t) {
+                    return values[x-table_info->begin()];
+                }
+            }
+
+            // should never reached here.
+            return record_value(0);
+        }
+
 		inline uint32_t size() {
 			return buf.size();
 		}

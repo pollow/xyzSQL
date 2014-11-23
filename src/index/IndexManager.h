@@ -348,11 +348,13 @@ public:
 	}
 	Block newIndexHead(){
 		Block b;
+        b.fillZero();
 		b.setByte(0x20,0);
 		return b;
 	}
 	Block newIndexHead2(){
 		Block b;
+        b.fillZero();
 		b.setByte(0x02,4095);
 		return b;
 	}

@@ -21,6 +21,9 @@ void RecordManager::createMaster(std::string tableName) {
 	b.setBlockCount(0);
 	bm->writeBlock(tableName + "/" + master, 0, b);
 	bm->printQ();
+
+    string primary_index = tableName + "/index_" + cm->get_primary(tableName) + ".db";
+    im->createIndex("master.index", "int", 4, 0, {}, {}, {});
 }
 
 void RecordManager::deleteRecord(std::string tableName, int blocknum, int offset, int size) {
@@ -72,7 +75,7 @@ void RecordManager::insertRecord(std::string tableName, Record newRecord) {
     int blockNum, offset;
 	for (i = 0; i < b.getBlockCount(); i++) {
 		d = bm->readBlock(filename, i + 1);
-		finish = d.insertRecord(newRecord);
+		finish = d.insertRecord(newRecord, offset);
 		if (finish) {
 			bm->writeBlock(filename, i + 1, d);
             blockNum = i+1;
@@ -82,7 +85,7 @@ void RecordManager::insertRecord(std::string tableName, Record newRecord) {
 	if (!finish) {
 		recordBlock newBlock;
 		newBlock.Init(newRecord.size());
-		newBlock.insertRecord(newRecord);
+		newBlock.insertRecord(newRecord, offset);
 		bm->writeBlock(filename, b.getBlockCount() + 1, newBlock);
         blockNum = b.getBlockCount() + 1;
 		b.setBlockCount(b.getBlockCount() + 1);
@@ -90,7 +93,7 @@ void RecordManager::insertRecord(std::string tableName, Record newRecord) {
 	}
 
 	// update index
-    im->insertNode("master.index", cm->get_primary(filename), blockNum, 0);
+    im->insertNode("master.index", newRecord.get_value(cm->get_primary(tableName)).to_str(table_column::INTTYPE) , blockNum, offset);
 }
 
 Record RecordManager::getRecord(std::string tableName, int blocknum, int offset, int size) {

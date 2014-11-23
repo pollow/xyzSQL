@@ -32,19 +32,21 @@ void Record::unpack() {
 }
 
 void Record::pack() {
-    vector<unsigned char> result;
+    // vector<unsigned char> result;
     string tmp;
 
     auto t = table_info;
     auto j = values.begin();
+    int ttt;
 
     for( auto i = t->begin(); i != t->end(); i++, j++) {
         switch((*i)->data_type) {
             case table_column::INTTYPE : 
-                tmp.append( j->as_str(), 4 );
+                ttt = j->as_int();
+                tmp.append( (char *)&(ttt), 4 );
                 break;
             case table_column::FLOATTYPE :
-                tmp.append( j->as_str(), 4 );
+                tmp.append( (char *)&(ttt), 4 );
                 break;
             case table_column::CHARTYPE :
                 tmp.append( j->as_str(), (*i)->str_len );
@@ -52,6 +54,6 @@ void Record::pack() {
         }
     }
 
-    result.assign(tmp.begin(), tmp.end());
+    buf.assign(tmp.begin(), tmp.end());
 }
 

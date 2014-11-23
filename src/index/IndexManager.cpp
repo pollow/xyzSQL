@@ -419,7 +419,7 @@ void treeNode::merge(treeNode* t1, treeNode*t2,string keyValue)
 			if(j<=t2->keyNumber-1)
 			{
 				t1->setKey(i,t2->getKey(j));
-				t1->setChild(i,getChild(j));
+				t1->setChild(i,t2->getChild(j));
 				t1->keyNumber++;
 			}
 			else break;
@@ -868,7 +868,7 @@ int treeNode::deleteElement(blockAnalyzer* analyzer,string fileName,string value
 		}
 		if(result==2||result==3)
 		{
-			cout<<"ok??"<<endl;
+			//cout<<"ok??"<<endl;
 			Block tmpBlock1;
 			treeNode* tmpNode1;
 			if(p!=keyNumber) //merge or borrow from back
@@ -896,7 +896,7 @@ int treeNode::deleteElement(blockAnalyzer* analyzer,string fileName,string value
 				}
 				else //borrow
 				{
-					cout<<"ok???"<<endl;
+					//cout<<"ok???"<<endl;
 					if(tmpNode->Leaf)	// subNode is leaf
 					{
 						tmpNode->setKey(tmpNode->keyNumber,tmpNode1->getKey(0));
@@ -957,7 +957,7 @@ int treeNode::deleteElement(blockAnalyzer* analyzer,string fileName,string value
 				if(!tmpNode1->enoughGive())//merge
 				{
 
-					cout<<"ok?????"<<endl;
+					//cout<<"ok?????"<<endl;
 					merge(tmpNode1,tmpNode,getKey(p-1));
 					deleteFromNonLeaf(p-1);
 					analyzer->deleteBlock(tmpNode->getBlockNumber());
@@ -966,14 +966,10 @@ int treeNode::deleteElement(blockAnalyzer* analyzer,string fileName,string value
 					{
 						tmpNode1->setRoot(true);
 						analyzer->changeRootPos(tmpNode1->getBlockNumber());
-						cout<<"rootPos"<<tmpNode1->getBlockNumber()<<endl;
-						getchar();
-						getchar();
-						getchar();
-						getchar();
-						getchar();
-						cout<<"currootPos"<<analyzer->getRootPosition()<<endl;
-						getchar();
+//						cout<<"rootPos"<<tmpNode1->getBlockNumber()<<endl;
+//
+//						cout<<"currootPos"<<analyzer->getRootPosition()<<endl;
+//						getchar();
 						analyzer->deleteBlock(getBlockNumber());
 						tmpNode1->writeBack(fileName);
 						delete tmpNode1;
@@ -985,7 +981,7 @@ int treeNode::deleteElement(blockAnalyzer* analyzer,string fileName,string value
 				}
 				else //borrow
 				{
-					cout<<"ok????"<<endl;
+
 					if(tmpNode->Leaf)
 					{
 						tmpNode->moveBackward();
@@ -1150,7 +1146,7 @@ int IndexManager::deleteNode(string fileName, string value)
 	tmpNode=new treeNode(myBufferManager,tmpBlock1);
 	//cout<<"ok2"<<endl;
 	int result=tmpNode->deleteElement(myAnalyzer,fileName,value,newKey);
-	cout<<"ok?"<<endl;
+	//cout<<"ok?"<<endl;
 	if(result == -1)
 	{
 		delete tmpNode;
@@ -1185,7 +1181,7 @@ void IndexManager::createIndex(string fileName,string colType,int32_t charLen,in
 	{	insertNode(fileName,value[i],blockNumber[i],blockOffset[i]);
 		it++;
 	}
-	print(fileName);
+	//print(fileName);
 //	Block block3=myBufferManager->readBlock(fileName,2);
 //	block3.print();
 

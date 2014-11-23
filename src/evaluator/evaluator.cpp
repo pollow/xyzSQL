@@ -324,7 +324,7 @@ void xyzsql_process_insert(insert_stmt *s ) {
     if ( s == NULL )
         s = dynamic_cast<insert_stmt *>(stmt_queue.front().second);
 
-    // RecordManager.insertRecord(s->table_name, Record(s->values));
+    RecordManager.insertRecord(s->table_name, Record(*(s->values), catm.exist_relation(s->table_name)->cols));
     cout << "record inserted." << endl;
 }
 

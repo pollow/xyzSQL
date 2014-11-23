@@ -22,8 +22,8 @@
 #include <stdint.h>
 #include <bitset>
 #include <queue>
-//#include "../buffer/BufferManager.h"
-//#include "../buffer/Block.h"
+#include "../buffer/BufferManager.h"
+#include "../buffer/Block.h"
 
 #define BLOCKSIZE 4096
 //#define maxBTreeNode 100
@@ -32,40 +32,40 @@ using namespace std;
 
 class indexIterator;
 
-class Block
-{
-public:
-	Block(){}
-	~Block(){}
-	unsigned char getByte(int32_t i){return b[i];}
-	void setByte(unsigned char c, int32_t i){b[i]=c;}
-	void print(){// for test
-		for(int i=0;i<4096;i++)
-		{
-			cout<<(unsigned int)(b[i])<<" ";
-			if(i%16==15)
-				cout<<endl;
-			if(i%256==255)
-				cout<<"|||"<<i+1<<endl;
-		}
-	}
-private:
-	unsigned char b[4096];
-};
-
-
-class BufferManager
-{
-public:
-	BufferManager(){}
-	~BufferManager(){}
-	Block readBlock(string fileName,int32_t i){return blocks[i];}
-	void writeBlock(string fileName,int32_t i,Block &b){blocks[i]=b;}
-	void createFile(string fileName){}
-	void deleteFile(string fileName){}
-private:
-	Block blocks[100];
-};
+// class Block
+// {
+// public:
+// 	Block(){}
+// 	~Block(){}
+// 	unsigned char getByte(int32_t i){return b[i];}
+// 	void setByte(unsigned char c, int32_t i){b[i]=c;}
+// 	void print(){// for test
+// 		for(int i=0;i<4096;i++)
+// 		{
+// 			cout<<(unsigned int)(b[i])<<" ";
+// 			if(i%16==15)
+// 				cout<<endl;
+// 			if(i%256==255)
+// 				cout<<"|||"<<i+1<<endl;
+// 		}
+// 	}
+// private:
+// 	unsigned char b[4096];
+// };
+// 
+// 
+// class BufferManager
+// {
+// public:
+// 	BufferManager(){}
+// 	~BufferManager(){}
+// 	Block readBlock(string fileName,int32_t i){return blocks[i];}
+// 	void writeBlock(string fileName,int32_t i,Block &b){blocks[i]=b;}
+// 	void createFile(string fileName){}
+// 	void deleteFile(string fileName){}
+// private:
+// 	Block blocks[100];
+// };
 
 
 class blockAnalyzer

@@ -2,7 +2,7 @@
 extern "C" int yylex();
 extern int yyerror( const char * );
 
-#include "./parser/stmt.h"
+#include "src/parser/stmt.h"
 #include "parser.tab.h"
 
 #include <iostream>

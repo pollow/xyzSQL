@@ -1,5 +1,24 @@
+#ifndef __EVALUATOR_H__
+#define __EVALUATOR_H__
+
+#include <readline/readline.h>
+#include <readline/history.h>
+#include <iostream>
+#include <cctype>
+#include <set>
+#include <cstdlib>
+#include <uuid/uuid.h>
+#include <sstream>
+
 #include "../catalog/catalog.h"
 #include "../parser/stmt.h"
+#include "../record/record.h"
+#include "../buffer/Block.h"
+#include "../buffer/File.h"
+#include "../buffer/BufferManager.h"
+#include "../index/IndexManager.h"
+#include "../record/RecordManager.h"
+
 #include <queue>
 
 extern queue<pair<stmt_type, statement *> > stmt_queue;
@@ -34,3 +53,6 @@ void xyzsql_process_insert(insert_stmt *s = NULL);
 void xyzsql_unknown_stmt() ;
 
 void xyzsql_finalize();
+
+#endif
+

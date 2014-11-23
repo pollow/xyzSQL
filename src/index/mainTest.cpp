@@ -9,7 +9,7 @@
 #include <ctime>
 #include <cstdlib>
 #include "IndexManager.h"
-#define MAX 200
+#define MAX 80
 using namespace std;
 
 void f(string a[], int num)
@@ -35,7 +35,7 @@ int main()
 	int32_t block[MAX]={0};
 	int32_t offset[MAX]={0};
 	string value[MAX];
-	string dvalue[MAX/2];
+	string dvalue[190];
 	BufferManager myBufferManager;
 	IndexManager i(&myBufferManager);
 	//myBufferManager.createFile("abc.db");
@@ -47,7 +47,7 @@ int main()
 		ss<<i;
 		ss>>value[i];
 	}
-	for(int i=0;i<MAX/2;i++)
+	for(int i=0;i<190;i++)
 	{
 		stringstream ss;
 		ss.clear();
@@ -55,28 +55,35 @@ int main()
 		ss>>dvalue[i];
 	}
 	f(value,MAX);
-	f(dvalue,MAX/2);
+	f(dvalue,190);
 //	for(int i=0;i<MAX;i++)
 //		cout<<value[i]<<endl;
 //	cout<<endl;
-//	for(int i=0;i<MAX/2;i++)
+//	for(int i=0;i<190;i++)
 //			cout<<dvalue[i]<<endl;
-	i.createIndex("abc.db","char",200,MAX,value,block,offset);
-	int j;
-	for(j=0;j<30;j++){
-		cout<<"delete:"<<dvalue[j]<<endl;
-		i.deleteNode("abc.db",dvalue[j]);}
 
+
+	i.createIndex("abc.db","char",200,MAX,value,block,offset);
+//	int j;
+//	for(j=0;j<190;j++){
+//		//cout<<"delete:"<<dvalue[j]<<endl;
+//		i.deleteNode("abc.db",dvalue[j]);
+//	}
+//
 		i.print("abc.db");
-	while(true)
-	{
-		getchar();
-		cout<<"delete:"<<dvalue[j]<<endl;
-		getchar();
-		i.deleteNode("abc.db",dvalue[j]);
-		i.print("abc.db");
-		j++;
-	}
+
+//	while(true)
+//	{
+//		//getchar();
+//		cout<<"delete:"<<dvalue[j]<<endl;
+//		//getchar();
+//		i.deleteNode("abc.db",dvalue[j]);
+//		cout<<"delete finish"<<endl;
+//	//	getchar();
+//
+//		i.print("abc.db");
+//		j++;
+//	}
 //	while(true){
 //		string str;
 //		cout<<"please input:";
@@ -95,7 +102,7 @@ int main()
 //		else
 //			i.deleteNode("a",tmp11);
 //		i.print("aa");
-//	}
+//	}afasd
 	return 0;
 }
 

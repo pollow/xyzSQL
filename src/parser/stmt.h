@@ -32,10 +32,6 @@ class table_column {
         string name;
         int data_type, str_len, flag;
 
-        void print() {
-            cout << name << ' ' << data_type << ' ' << flag << endl;
-        }
-
         table_column(const char *_name, int _data_type, int _str_len, int _flag) :
             name(_name), data_type(_data_type), str_len(_str_len), flag(_flag) {}
 };
@@ -58,61 +54,21 @@ class record_value {
         record_value(int      _value) { memcpy(&value, &_value, 4); }
         record_value(float    _value) { memcpy(&value, &_value, 4); }
 
-        float as_float() const {
-            float tmp = 0; 
-            memcpy(&tmp, &value, 4); 
-            return tmp;
-        }
+        float as_float() const ;
 
-        char * as_str() const {
-            char *tmp;
-            memcpy(&tmp, &value, 4); 
-            return tmp;
-        }
+        char * as_str() const ;
 
-        int as_int() const {
-            return value;
-        }
+        int as_int() const ;
 
-        string to_str(int data_type) {
-            switch (data_type) {
-                case table_column::INTTYPE : 
-                    return (stringstream() << as_int()).str();
-                case table_column::FLOATTYPE :
-                    return (stringstream() << as_float()).str();
-                case table_column::CHARTYPE :
-                    return string(as_str());
-                default : return "";
-            }
-        }
+        string to_str(int data_type) ;
 
-        static int compare_as_int(const record_value &a, const record_value &b) {
-            if (a.as_int() < b.as_int()) return -1;
-            else if (a.as_int() > b.as_int()) return 1;
-            else return 0;
-        }
+        static int compare_as_int(const record_value &a, const record_value &b) ;
 
-        static int compare_as_float(const record_value &a, const record_value &b) {
-            if (a.as_float() < b.as_float()) return -1;
-            else if (a.as_float() > b.as_float()) return 1;
-            else return 0;
-        }
+        static int compare_as_float(const record_value &a, const record_value &b) ;
 
-        static int compare_as_str(const record_value &a, const record_value &b) {
-            return strcmp(a.as_str(), b.as_str());
-        }
+        static int compare_as_str(const record_value &a, const record_value &b) ;
 
-        static int compare(int data_type, const record_value &a, const record_value &b) {
-            switch (data_type) {
-                case table_column::INTTYPE : 
-                    return compare_as_int(a, b); break;
-                case table_column::FLOATTYPE :
-                    return compare_as_float(a, b); break;
-                case table_column::CHARTYPE :
-                    return compare_as_str(a, b); break;
-                default : return false;
-            }
-        }
+        static int compare(int data_type, const record_value &a, const record_value &b) ;
 };
 
 class condition {
@@ -134,25 +90,7 @@ class condition {
         condition(attribute *l, char *r,        int _op) : 
             left_attr(l), v(r), op(_op), flag(false) {}
 
-        bool calc(pair<table_column *, record_value> p) {
-            assert(flag == false);
-            switch(op) {
-                case EQUALTO : 
-                    return record_value::compare(p.first->data_type, v, p.second) == 0;
-                case GREATERTHAN :
-                    return record_value::compare(p.first->data_type, v, p.second) > 0;
-                case LESSTHAN :
-                    return record_value::compare(p.first->data_type, v, p.second) < 0;
-                case GREATER_EQUAL :
-                    return record_value::compare(p.first->data_type, v, p.second) >= 0;
-                case LESS_EQUAL :
-                    return record_value::compare(p.first->data_type, v, p.second) <= 0;
-                case NOT_EQUAL :
-                    return record_value::compare(p.first->data_type, v, p.second) != 0;
-                default : 
-                    return false;
-            }
-        }
+        bool calc(pair<table_column *, record_value> p) ;
 
         static const int EQUALTO = 1, GREATERTHAN = 2, LESSTHAN = 3, GREATER_EQUAL = 4, LESS_EQUAL = 5, NOT_EQUAL = 6;
 };
@@ -162,7 +100,7 @@ class algbric_node {
         int op;
         bool flag;
         algbric_node *left, *right; 
-        string *table;
+        string table;
         vector<condition *> conditions;
         vector<attribute *> *projection_list; 
 
@@ -186,28 +124,6 @@ class select_stmt : public statement {
 
         select_stmt(vector<attribute *> *pl, vector<string *> *tl, vector<condition *> *cl) : 
             statement(), projection_list(pl), table_list(tl), condition_list(cl) {}
-
-        void print() {
-            for ( auto x : *projection_list ) {
-                cout << x->full_name << ",";
-            }
-            cout << endl;
-            for ( auto x : *table_list) {
-                cout << *x << ",";
-            }
-            cout << endl;
-        }
-
-        // void parse_algebric_tree() {
-        //     vector<algbric_node *> tables;
-        //     for( auto x : *table_list ) {
-        //         auto tmp = new algbric_node(algbric_node::DIRECT);
-        //         tmp->table = x;
-        //         tables.push_back(tmp);
-        //     }
-        //     // root = new algbric_node(algbric_node::PROJECTION);
-
-        // }
 };
 
 class create_table_stmt : public statement {
@@ -221,15 +137,6 @@ class create_table_stmt : public statement {
 
         create_table_stmt(const char *_name, vector<table_column *> *_cols) : 
             statement(), name(_name), cols(_cols) {}
-
-        void print() {
-            cout << "Table " << name << " contains " << get_col_size() << " columns:" << endl;
-            for(auto x : *cols) {
-                cout << "\t";
-                x->print();
-            }
-            cout << endl;
-        }
 };
 
 class create_index_stmt : public statement {

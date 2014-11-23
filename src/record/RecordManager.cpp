@@ -25,7 +25,7 @@ void RecordManager::createMaster(std::string tableName) {
 
 void RecordManager::deleteRecord(std::string tableName, int blocknum, int offset, int size) {
 	std::string filename = tableName + "/" + master;
-	recordBlock r = bm->readBlock(filename, blocknum);
+	recordBlock r( bm->readBlock(filename, blocknum) );
 	r.deleteRecord(size, offset);
 	bm->writeBlock(filename, blocknum, r);
 }
@@ -69,11 +69,13 @@ void RecordManager::insertRecord(std::string tableName, Record newRecord) {
 	bm->printQ();
 	recordBlock d;
 	int i;
+    int blockNum, offset;
 	for (i = 0; i < b.getBlockCount(); i++) {
 		d = bm->readBlock(filename, i + 1);
 		finish = d.insertRecord(newRecord);
 		if (finish) {
 			bm->writeBlock(filename, i + 1, d);
+            blockNum = i+1;
 			break;
 		}
 	}
@@ -82,18 +84,20 @@ void RecordManager::insertRecord(std::string tableName, Record newRecord) {
 		newBlock.Init(newRecord.size());
 		newBlock.insertRecord(newRecord);
 		bm->writeBlock(filename, b.getBlockCount() + 1, newBlock);
+        blockNum = b.getBlockCount() + 1;
 		b.setBlockCount(b.getBlockCount() + 1);
 		bm->writeBlock(filename, 0, b);
 	}
 
 	// update index
+    im->insertNode("master.index", cm->get_primary(filename), blockNum, 0);
 }
 
 Record RecordManager::getRecord(std::string tableName, int blocknum, int offset, int size) {
 	std::string filename = master + "/" + tableName;
 	auto cat = cm->exist_relation(tableName);
 	recordBlock r = bm->readBlock(filename, blocknum);
-	return Record(r.getRecord, cat->cols);
+	return Record(r.getRecord(size, offset), cat->cols);
 }
 
 RecordManager::~RecordManager() {}

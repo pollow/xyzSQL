@@ -11,7 +11,6 @@
 #include <cmath>
 using namespace std;
 
-int it=0;
 treeNode::treeNode(BufferManager* bfmgr,Block b)
 {
 	myBufferManager=bfmgr;
@@ -355,20 +354,31 @@ void treeNode::setLinkedLeafNode(int32_t blockNumber)
 
 
 //in index file, get the block number of the leaf node which may contain an element whose value is equal to condition
-int treeNode::getLeaf(indexIterator &it,string fileName,string condition)
+int treeNode::getLeaf(indexIterator &it,string fileName,string condition,int condType)
 {	//得到condition条件所对应的叶子节点的block号
 	int32_t i=findPos(condition);
-	if(Leaf&&!exist(condition))
-		return -1;
+	//if(Leaf&&!exist(condition))
+		//return -1;
 	if(Leaf)
 	{
-		it.set(fileName,myBufferManager,this,i-1);
-		return 0;
+		if(exist(condition))
+		{
+			if(condType==1||condType==4)
+				it.set(fileName,myBufferManager,this,i-1);
+			if(condType==2)
+				it.set(fileName,myBufferManager,this,i);
+			return 0;
+		}
+		else
+		{
+			it.set(fileName,myBufferManager,this,i);
+		}
+		return -1;
 	}
 	Block tmpBlock=myBufferManager->readBlock(fileName, children[i]);
 	treeNode* tmpNode=new treeNode(myBufferManager,tmpBlock);
-	int result=tmpNode->getLeaf(it,fileName,condition);
-	if(!tmpNode->Leaf||result==-1)
+	int result=tmpNode->getLeaf(it,fileName,condition,condType);
+	if(!tmpNode->Leaf)
 		delete tmpNode;
 	return result;
 }
@@ -385,7 +395,7 @@ int treeNode::getLeftestLeaf(indexIterator &it,string fileName)
 	Block tmpBlock=myBufferManager->readBlock(fileName, children[0]);
 	treeNode* tmpNode=new treeNode(myBufferManager,tmpBlock);
 	int result=tmpNode->getLeftestLeaf(it,fileName);
-	if(!tmpNode->Leaf||result==-1)
+	if(!tmpNode->Leaf)
 		delete tmpNode;
 	return result;
 }
@@ -1049,14 +1059,19 @@ int IndexManager::selectNode(indexIterator &iterator,string fileName, int condTy
 	blockPos1=myAnalyzer->getRootPosition();
 	tmpBlock=myBufferManager->readBlock(fileName,blockPos1);//得到root所在的Block
 	currentNode=new treeNode(myBufferManager,tmpBlock);//用Block还原出root
-
+	//"=" 1 ,">" 2, "<" 3, ">=" 4, "<=" 5
 	if(condType==3||condType==5)//where的条件为小于或小于等于
 		result=currentNode->getLeftestLeaf(iterator,fileName);
 	else
-		result=currentNode->getLeaf(iterator,fileName,condition);
-	if(!currentNode->isLeaf()||result==-1)
+		result=currentNode->getLeaf(iterator,fileName,condition,condType);
+	if(condType==1&&result==-1)
+	{
 		delete currentNode;
-	return result;
+		return -1;
+	}
+	if(!currentNode->isLeaf())
+		delete currentNode;
+	return 0;
 }
 
 
@@ -1169,6 +1184,7 @@ void IndexManager::createIndex(string fileName,string colType,int32_t charLen,in
 	myBufferManager->createFile(fileName);
 	myBufferManager->writeBlock(fileName,0,block1);
 	myBufferManager->writeBlock(fileName,1,block2);
+	//myBufferManager->printQ();
 	myAnalyzer=new blockAnalyzer(block1,block2,myBufferManager);
 //	cout<<myAnalyzer->getNextEmptyBlock()<<endl;
 //	cout<<myAnalyzer->getRootPosition()<<endl;
@@ -1178,9 +1194,8 @@ void IndexManager::createIndex(string fileName,string colType,int32_t charLen,in
 	lastFile=fileName;
 	//cout<<"ok3"<<endl;
 	for(int32_t i=0;i<number;i++)
-	{	insertNode(fileName,value[i],blockNumber[i],blockOffset[i]);
-		it++;
-	}
+		insertNode(fileName,value[i],blockNumber[i],blockOffset[i]);
+
 	//print(fileName);
 //	Block block3=myBufferManager->readBlock(fileName,2);
 //	block3.print();

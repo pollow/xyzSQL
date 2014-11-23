@@ -4,7 +4,7 @@
 #include <cctype>
 
 #include "../parser/stmt.h"
-#include "../parser.tab.h"
+#include "../../parser.tab.h"
 #include "evaluator.h"
 
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
@@ -16,8 +16,18 @@ extern int yyparse ();
  
 using namespace std;
 
+BufferManager BufferManager;
+IndexManager IndexManager(&BufferManager);
+catalog_manager catm(".");
+RecordManager RecordManager;
+
+string base_addr = ".";
+
 void system_init() { 
     cout << "System Initialized!" << endl;
+
+    RecordManager.Init(&BufferManager, &catm, &IndexManager);
+
 }
 
 int main() {

@@ -24,6 +24,7 @@
 #include <queue>
 #include "../buffer/BufferManager.h"
 #include "../buffer/Block.h"
+
 #define BLOCKSIZE 4096
 //#define maxBTreeNode 100
 //#define max(a,b) {if((a)>(b)) return (a); return (b);}
@@ -124,10 +125,10 @@ public:
 	}
 	void changeRootPos(int32_t Position)
 	{
-		b[1].setByte((Position&0xFF000000)>>24,4092);
-		b[1].setByte((Position&0x00FF0000)>>16,4093);
-		b[1].setByte((Position&0x0000FF00)>>8,4094);
-		b[1].setByte(Position&0xFF,4095);
+		b[1].setByte(Position>>24,4092);
+		b[1].setByte(Position>>16,4093);
+		b[1].setByte(Position>>8,4094);
+		b[1].setByte(Position,4095);
 	}
 	void deleteBlock(int32_t blockPos)
 	{
@@ -293,11 +294,16 @@ public:
 		myBufferManager=bfmngr;
 	}
 	virtual ~IndexManager(){delete myAnalyzer;}
-	int selectNode(indexIterator &iterator,string fileName, string condType ,string condition);
+	int selectNode(indexIterator &iterator,string fileName, int  condType ,string condition);
 	int insertNode(string fileName, string value, int32_t recordBlockNumber, int32_t recordBlockOffset);
 	int deleteNode(string fileName, string value);
 	void createIndex(string fileName,string colType,int32_t charLen,int32_t number,string value[], int32_t blockNumber[], int32_t blockOffset[]);
 	void dropIndex(string fileName);
+	int getStarter(indexIterator &it,string fileName){
+		string tmp="";
+		selectNode(it,fileName,3,tmp);
+		return 0;
+	}
 	void print(string fileName){
 		Block tmpBlock,tmpBlock2;
 		queue<int32_t> myQueue;
@@ -358,12 +364,8 @@ private:
 class indexIterator
 {
 public:
-	// indexIterator(string f,BufferManager* b,treeNode* t,int32_t it){
-	// 	node=t;
-	// 	fileName=f;
-	// 	myBufferManager=b;
-	// 	i=it;
-	// }
+	indexIterator(){}
+
 	~indexIterator(){}
 	int next(int32_t& t1,int32_t& t2)
 	{

@@ -166,7 +166,7 @@ bool treeNode::enough()
 		if(keyNumber>=ceil((double)maxNumber/2))
 			return true;
 	}
-	else if(keyNumber>=ceil((double)(maxNumber+1)/2))
+	else if(keyNumber>=ceil((double)(maxNumber+1)/2)-1)
 		return true;
 	return false;
 }
@@ -184,7 +184,7 @@ bool treeNode::enoughGive()
 		if(keyNumber>=1+ceil((double)maxNumber/2))
 			return true;
 	}
-	else if(keyNumber>=1+ceil((double)(maxNumber+1)/2))
+	else if(keyNumber>=ceil((double)(maxNumber+1)/2))
 		return true;
 	return false;
 }
@@ -845,6 +845,7 @@ int treeNode::deleteElement(blockAnalyzer* analyzer,string fileName,string value
 		if(result==0||result==-1)
 		{
 			delete tmpNode;
+			writeBack(fileName);
 			return result;
 		}
 		if(result==1)
@@ -853,6 +854,7 @@ int treeNode::deleteElement(blockAnalyzer* analyzer,string fileName,string value
 			if(p!=0)
 			{
 				setKey(p-1,newValue);
+				writeBack(fileName);
 				return 0;
 			}
 			else
@@ -860,11 +862,13 @@ int treeNode::deleteElement(blockAnalyzer* analyzer,string fileName,string value
 				if(Root)
 					return 0;
 				newKey=newValue;
+				writeBack(fileName);
 				return 1;
 			}
 		}
 		if(result==2||result==3)
 		{
+			cout<<"ok??"<<endl;
 			Block tmpBlock1;
 			treeNode* tmpNode1;
 			if(p!=keyNumber) //merge or borrow from back
@@ -892,6 +896,7 @@ int treeNode::deleteElement(blockAnalyzer* analyzer,string fileName,string value
 				}
 				else //borrow
 				{
+					cout<<"ok???"<<endl;
 					if(tmpNode->Leaf)	// subNode is leaf
 					{
 						tmpNode->setKey(tmpNode->keyNumber,tmpNode1->getKey(0));
@@ -923,9 +928,11 @@ int treeNode::deleteElement(blockAnalyzer* analyzer,string fileName,string value
 						else
 						{
 							newKey=newValue;
+							writeBack(fileName);
 							return 1;
 						}
 					}
+					writeBack(fileName);
 					return 0;
 				}
 				else
@@ -949,6 +956,8 @@ int treeNode::deleteElement(blockAnalyzer* analyzer,string fileName,string value
 				tmpNode1=new treeNode(myBufferManager,tmpBlock1);
 				if(!tmpNode1->enoughGive())//merge
 				{
+
+					cout<<"ok?????"<<endl;
 					merge(tmpNode1,tmpNode,getKey(p-1));
 					deleteFromNonLeaf(p-1);
 					analyzer->deleteBlock(tmpNode->getBlockNumber());
@@ -957,6 +966,14 @@ int treeNode::deleteElement(blockAnalyzer* analyzer,string fileName,string value
 					{
 						tmpNode1->setRoot(true);
 						analyzer->changeRootPos(tmpNode1->getBlockNumber());
+						cout<<"rootPos"<<tmpNode1->getBlockNumber()<<endl;
+						getchar();
+						getchar();
+						getchar();
+						getchar();
+						getchar();
+						cout<<"currootPos"<<analyzer->getRootPosition()<<endl;
+						getchar();
 						analyzer->deleteBlock(getBlockNumber());
 						tmpNode1->writeBack(fileName);
 						delete tmpNode1;
@@ -968,6 +985,7 @@ int treeNode::deleteElement(blockAnalyzer* analyzer,string fileName,string value
 				}
 				else //borrow
 				{
+					cout<<"ok????"<<endl;
 					if(tmpNode->Leaf)
 					{
 						tmpNode->moveBackward();
@@ -995,6 +1013,7 @@ int treeNode::deleteElement(blockAnalyzer* analyzer,string fileName,string value
 				}
 				if(enough())
 				{
+					writeBack(fileName);
 					return 0;
 				}
 				else
@@ -1011,7 +1030,7 @@ int treeNode::deleteElement(blockAnalyzer* analyzer,string fileName,string value
 }
 
 
-int IndexManager::selectNode(indexIterator &iterator,string fileName, string condType ,string condition)
+int IndexManager::selectNode(indexIterator &iterator,string fileName, int condType ,string condition)
 {
 	int result;
 	Block tmpBlock;
@@ -1034,7 +1053,8 @@ int IndexManager::selectNode(indexIterator &iterator,string fileName, string con
 	blockPos1=myAnalyzer->getRootPosition();
 	tmpBlock=myBufferManager->readBlock(fileName,blockPos1);//得到root所在的Block
 	currentNode=new treeNode(myBufferManager,tmpBlock);//用Block还原出root
-	if(condType=="<="||condType=="<")//where的条件为小于或小于等于
+
+	if(condType==3||condType==5)//where的条件为小于或小于等于
 		result=currentNode->getLeftestLeaf(iterator,fileName);
 	else
 		result=currentNode->getLeaf(iterator,fileName,condition);
@@ -1130,6 +1150,7 @@ int IndexManager::deleteNode(string fileName, string value)
 	tmpNode=new treeNode(myBufferManager,tmpBlock1);
 	//cout<<"ok2"<<endl;
 	int result=tmpNode->deleteElement(myAnalyzer,fileName,value,newKey);
+	cout<<"ok?"<<endl;
 	if(result == -1)
 	{
 		delete tmpNode;

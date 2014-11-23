@@ -4,7 +4,7 @@
 
 #ifdef GNNNG_CUSTOM
 class IndexManager;
-
+class catalog_manager;
 #else
 #include "../catalog/catalog.h"
 #include "../parser/stmt.h"
@@ -17,7 +17,7 @@ class IndexManager;
 #include "../buffer/BufferManager.h"
 #include "../buffer/Block.h"
 #include "../index/IndexManager.h"
-#include "../catalog/catalog.h"
+//#include "../catalog/catalog.h"
 
 class Cursor {
 public:
@@ -57,7 +57,7 @@ public:
 	//	return *reinterpret_cast<std::uint32_t *>(this->dataPointer() + 4);
 	//}
 
-	bool insertRecord(Record r) {
+	bool insertRecord(Record r, int &offset) {
 		char * headOfRecord = nullptr;
 		int size = r.size() + 4; // first int used to save pointer or flag
 		uint32_t j = size;
@@ -71,6 +71,7 @@ public:
 			uint32_t next = *reinterpret_cast<std::uint32_t *>(headOfRecord);
 			*reinterpret_cast<std::uint32_t *>(this->dataPointer()) = next;
 			*reinterpret_cast<std::uint32_t *>(headOfRecord) = 0xffffffff;
+			offset = i;
 			headOfRecord += 4;
 			for (i = 0; i < r.size(); i++) {
 				*reinterpret_cast<unsigned char *>(headOfRecord + i) = r.buf[i];
@@ -135,10 +136,6 @@ private:
 //		
 //	}
 //};
-
-class IndexManager {
-
-};
 
 class RecordManager {
 public:

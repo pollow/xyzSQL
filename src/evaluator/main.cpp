@@ -2,7 +2,7 @@
 #include <readline/history.h>
 #include <iostream>
 #include <cctype>
-
+#include <sstream>
 #include "../parser/stmt.h"
 #include "../../parser.tab.h"
 #include "evaluator.h"

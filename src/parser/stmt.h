@@ -5,7 +5,7 @@
 #include <vector>
 #include <cassert>
 #include <sstream>
-
+#include <cstring>
 using namespace std;
 
 enum stmt_type {

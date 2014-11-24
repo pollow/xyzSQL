@@ -11,7 +11,7 @@ extern IndexManager IndexManager;
 
 string create_temp_table(vector<table_column *> *t) {
     uuid_t out;
-    uuid_string_t uuid_str;
+    char *uuid_str;
     uuid_generate(out);
     uuid_unparse(out, uuid_str);
     create_table_stmt *cs = new create_table_stmt(uuid_str, t);

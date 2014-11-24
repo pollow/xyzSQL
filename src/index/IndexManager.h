@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include <bitset>
 #include <queue>
+#include <string>
 #include "../buffer/BufferManager.h"
 #include "../buffer/Block.h"
 

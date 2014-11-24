@@ -6,9 +6,11 @@
 */
 
 #include "IndexManager.h"
+#include <string>
 #include <sstream>
 #include <stdint.h>
 #include <cmath>
+
 using namespace std;
 
 treeNode::treeNode(BufferManager* bfmgr,Block b)

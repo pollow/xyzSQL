@@ -1184,7 +1184,7 @@ YY_RULE_SETUP
 case 56:
 YY_RULE_SETUP
 #line 74 "src/parser/parser.l"
-{ yylval.strval = strdup(yytext); cout <<"String: " << yytext << endl; return STRING; }
+{ yylval.strval = strdup(yytext); cout << "String: " << yytext << endl; return STRING; }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP

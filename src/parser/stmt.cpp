@@ -30,9 +30,11 @@ string record_value::to_str(int data_type) {
     stringstream x;
     switch (data_type) {
         case table_column::INTTYPE : 
-            return (x << as_int()).str();
+            x << as_int();
+            return x.str();
         case table_column::FLOATTYPE :
-            return (x << as_float()).str();
+            x << as_float();
+            return x.str();
         case table_column::CHARTYPE :
             return string(as_str());
         default : return "";

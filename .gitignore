@@ -42,3 +42,7 @@ src/buffer/data/
 data/*
 main.dSYM/*
 main
+
+parser.tab.c
+parser.tab.h
+lex.yy.c

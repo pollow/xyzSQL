@@ -2,7 +2,7 @@
 #include <readline/history.h>
 #include <iostream>
 #include <cctype>
-
+#include <sstream>
 #include "../parser/stmt.h"
 #include "../../parser.tab.h"
 #include "evaluator.h"
@@ -42,7 +42,9 @@ int main() {
 
         string tmp1("insert into q values ("), ddd;
 
-        ddd = tmp1 + (stringstream() << ii).str() + ");";
+        stringstream tmp_s;
+        tmp_s << ii;
+        ddd = tmp1 + tmp_s.str() + ");";
         const char * line = ddd.c_str();
         int len = strlen(line);
         // for (int i = 0; i < len; i++) line[i] = toupper(line[i]);

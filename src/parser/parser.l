@@ -71,7 +71,7 @@ float           { return FLOAT; }
 -?[0-9]+                    { yylval.intval = atoi(yytext); return INTNUM;}
 -?[0-9]+"."[0-9]*           { yylval.floatval = atof(yytext); return FLOATNUM; }
 
-'(\\.|''|[^'\n])*'          { yylval.strval = strdup(yytext); cout <<"String: " << yytext << endl; return STRING; }
+'(\\.|''|[^'\n])*'          { yylval.strval = strdup(yytext); cout << "String: " << yytext << endl; return STRING; }
 
 "="     { yylval.intval = 1; return COMP; } 
 ">"     { yylval.intval = 2; return COMP; } 

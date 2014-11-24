@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <cstdint>
-
+#include <cstring>
 #include "../parser/stmt.h"
 
 class Record {

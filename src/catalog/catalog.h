@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
-
+#include <cstring>
 class catalog {
     private:
         string name;

@@ -57,6 +57,8 @@ int main() {
         yy_switch_to_buffer( my_string_buffer );
         yyparse();
         yy_delete_buffer( my_string_buffer );
+        
+        delete[] tmp;
 
         while( !stmt_queue.empty() ) {
 

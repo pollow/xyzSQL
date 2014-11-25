@@ -23,7 +23,7 @@ void RecordManager::createMaster(std::string tableName) {
 	b.fillZero();
 	b.setBlockCount(0);
 	bm->writeBlock(tableName + "/" + master, 0, b);
-	bm->printQ();
+//	bm->printQ();
 }
 
 void RecordManager::deleteRecord(std::string tableName, int blocknum, int offset, int size) {
@@ -39,7 +39,7 @@ void RecordManager::insertRecord(std::string tableName, Record newRecord, int& b
     // 
 	bool finish = false;
 	recordBlock b = bm->readBlock(filename, 0);
-	bm->printQ();
+//	bm->printQ();
 	recordBlock d;
 	int i;
 	for (i = 0; i < b.getBlockCount(); i++) {
@@ -74,12 +74,13 @@ Record RecordManager::getRecord(std::string tableName, int blocknum, int offset,
 Cursor* RecordManager::getCursor(std::string tableName, int size) {
     std::string filename = tableName + "/" + master;
     recordBlock start = bm->readBlock(filename, 0);
-    if (cursor != nullptr) {
-        delete cursor; 
-        cursor = nullptr;
-    }
-    cursor = new Cursor(bm, cm, tableName, 1, 0, size, start.getBlockCount());
-    return cursor;
+//    if (cursor != nullptr) {
+//        delete cursor; 
+//        cursor = nullptr;
+//    }
+//    cursor = new Cursor(bm, cm, tableName, 1, 0, size, start.getBlockCount());
+//    return cursor;
+    return new Cursor(bm, cm, tableName, 1, 0, size, start.getBlockCount());
 }
 
 RecordManager::~RecordManager() {}

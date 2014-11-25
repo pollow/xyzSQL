@@ -33,6 +33,15 @@ string create_temp_table(vector<table_column *> *t) {
     return string(uuid_str);
 }
 
+bool calc_conditions(vector<condition *> *conditions, Record &c, Record &d) {
+    for(auto x : *conditions) {
+        auto col = catm.get_column(x->left_attr);
+        if (x->calc( {col, c.get_value(col)}, {col, d.get_value(col)} ) == false) 
+            return false;
+    }
+    return true;
+}
+
 bool calc_conditions(vector<condition *> *conditions, Record &c) {
     for(auto x : *conditions) {
         auto col = catm.get_column(x->left_attr);
@@ -46,9 +55,8 @@ void calc_algric_tree(algbric_node *root) {
     if (root->flag == true) 
         return;
     string table_name;
-    int b = 0, c = 0;
     int blockNum, offset;
-    auto new_col_list = new vector<table_column *>, old_col_list = new_col_list;
+    auto new_col_list = new vector<table_column *>, old_col_list = new_col_list, old_col_list2 = new_col_list;
     // auto old_col_list = catm.exist_relation((root->left->table))->cols;
 
     switch ( root->op ) {
@@ -152,7 +160,49 @@ void calc_algric_tree(algbric_node *root) {
         }
         case algbric_node::JOIN :
         {
+            // nested-loop join
+            
+            old_col_list = catm.exist_relation((root->left->table))->cols;
+            old_col_list2= catm.exist_relation((root->right->table))->cols;
 
+            for( auto x : *old_col_list ) {
+                new_col_list->push_back(new table_column((root->left->op == algbric_node::DIRECT ? (root->left->table + "." + x->name).c_str() : x->name.c_str()), x->data_type, x->str_len, 0 ));
+                cout << (root->left->op == algbric_node::DIRECT ? (root->left->table + "." + x->name).c_str() : x->name.c_str()) << endl;
+            }
+
+            for( auto x : *old_col_list2 ) {
+                new_col_list->push_back(new table_column((root->right->op == algbric_node::DIRECT ? (root->right->table + "." + x->name).c_str() : x->name.c_str()), x->data_type, x->str_len, 0 ));
+                cout << (root->right->op == algbric_node::DIRECT ? (root->right->table + "." + x->name).c_str() : x->name.c_str()) << endl;
+            }
+
+            table_name = create_temp_table(new_col_list);
+            root->table = table_name;
+
+            auto outter_table = catm.exist_relation(root->left->table), inner_table = catm.exist_relation(root->right->table);
+
+            for ( auto x : root->conditions ) {
+                if ( outter_table->get_column(x->left_attr->full_name) != NULL && inner_table->get_column(x->right_attr->full_name) != NULL) {
+
+                } else if ( inner_table->get_column(x->left_attr->full_name) != NULL && outter_table->get_column(x->right_attr->full_name) != NULL) {
+                    auto tmp = x->left_attr;
+                    x->left_attr = x->right_attr;
+                    x->right_attr = tmp;
+                }
+            }
+
+            auto cursor1 = RecordManager.getCursor(root->left->table, catm.calc_record_size(root->left->table));
+            while (cursor1->next()) {
+                Record r1 = cursor1->getRecord();
+                auto cursor2 = RecordManager.getCursor(root->right->table, catm.calc_record_size(root->right->table));
+                while (cursor1->next()) {
+                    Record r2 = cursor2->getRecord();
+                    if ( calc_conditions(&(root->conditions), r1, r2) )  {
+                        vector<record_value> result(r1.values);
+                        result.insert(result.end(), r2.values.begin(), r2.values.end());
+                        RecordManager.insertRecord(table_name, Record(result, new_col_list), blockNum, offset);
+                    }
+                }
+            }
         }
     }
 }
@@ -179,8 +229,12 @@ void xyzsql_exit() {
 
 void xyzsql_process_create_table(create_table_stmt *s ) {
     cout << "table created." << endl;
-    if ( s == NULL ) 
+    if ( s == NULL ) {
         s = dynamic_cast<create_table_stmt *>(stmt_queue.front().second);
+        for ( auto x : *(s->cols) ) {
+            x->name = s->name + x->name;
+        }
+    }
 
     if ( catm.exist_relation(s->name) == NULL ) {
         catm.add_relation(s);

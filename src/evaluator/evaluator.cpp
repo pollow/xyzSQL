@@ -62,6 +62,7 @@ void calc_algric_tree(algbric_node *root) {
                 new_col_list->push_back(new table_column((root->left->op == algbric_node::DIRECT ? x->attribute_name.c_str() : x->full_name.c_str()), att->data_type, att->str_len, 0 ));
             }
             table_name = create_temp_table(new_col_list);
+            root->table = table_name;
 
             // indexIterator cursor;
             // IndexManager.getStarter(cursor, base_addr + (root->left->table) + "/index_" + catm.get_primary(table_name) + ".db");
@@ -317,7 +318,6 @@ void xyzsql_process_select() {
     auto cursor = RecordManager.getCursor(root->table, catm.calc_record_size(root->table));
     while (cursor->next()) {
         Record t = cursor->getRecord();
-        vector<record_value> result;
         auto j = t.table_info->begin();
         for (record_value x : t.values)  {
             cout << x.to_str((*j)->data_type) << " ";

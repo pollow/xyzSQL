@@ -73,17 +73,17 @@ bool condition::calc(pair<table_column *, record_value> p) {
     assert(flag == false);
     switch(op) {
         case EQUALTO : 
-            return record_value::compare(p.first->data_type, v, p.second) == 0;
-        case GREATERTHAN :
-            return record_value::compare(p.first->data_type, v, p.second) > 0;
-        case LESSTHAN :
-            return record_value::compare(p.first->data_type, v, p.second) < 0;
-        case GREATER_EQUAL :
-            return record_value::compare(p.first->data_type, v, p.second) >= 0;
-        case LESS_EQUAL :
-            return record_value::compare(p.first->data_type, v, p.second) <= 0;
-        case NOT_EQUAL :
-            return record_value::compare(p.first->data_type, v, p.second) != 0;
+            return record_value::compare(p.first->data_type, p.second, v) == 0;
+        case GREATERTHAN :                                              
+            return record_value::compare(p.first->data_type, p.second, v) > 0;
+        case LESSTHAN :                                                 
+            return record_value::compare(p.first->data_type, p.second, v) < 0;
+        case GREATER_EQUAL :                                            
+            return record_value::compare(p.first->data_type, p.second, v) >= 0;
+        case LESS_EQUAL :                                               
+            return record_value::compare(p.first->data_type, p.second, v) <= 0;
+        case NOT_EQUAL :                                                
+            return record_value::compare(p.first->data_type, p.second, v) != 0;
         default : 
             return false;
     }

@@ -1,6 +1,5 @@
 #include "RecordManager.h"
 
-
 const std::string RecordManager::master = "master.db";
 const std::string RecordManager::trash = "trash.tmp";
 

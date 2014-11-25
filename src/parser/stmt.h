@@ -41,18 +41,19 @@ class attribute {
     public:
         string attribute_name, relation_name, full_name;
 
-        attribute(const char *attr, const char *relt) : attribute_name(attr), relation_name(relt), full_name(relation_name + "." + attribute_name) {}
+        attribute(const char *relt, const char *attr) : attribute_name(attr), relation_name(relt), full_name(relation_name + "." + attribute_name) {}
         
 };
 
 class record_value {
     public:
         uint32_t value;
+        int data_type; 
 
         record_value(uint32_t _value) : value(_value) {}
-        record_value(char *   _value) { memcpy(&value, &_value, 4); }
-        record_value(int      _value) { memcpy(&value, &_value, 4); }
-        record_value(float    _value) { memcpy(&value, &_value, 4); }
+        record_value(char *   _value) : data_type(table_column::CHARTYPE) { memcpy(&value, &_value, 4); }
+        record_value(int      _value) : data_type(table_column::INTTYPE) { memcpy(&value, &_value, 4); }
+        record_value(float    _value) : data_type(table_column::FLOATTYPE) { memcpy(&value, &_value, 4); }
 
         float as_float() const ;
 
@@ -193,3 +194,4 @@ class exefile_stmt : public statement {
 };
 
 #endif
+

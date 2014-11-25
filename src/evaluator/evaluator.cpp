@@ -7,12 +7,25 @@ extern RecordManager RecordManager;
 extern BufferManager BufferManager;
 extern IndexManager IndexManager;
 
+bool verify_validation(vector<record_value> *r, vector<table_column *> *t) {
+    auto i = r->begin();
+    auto j = t->begin();
+
+    if (r->size() != t->size()) return false;
+
+    for( ; i != r->end(); i++, j++) {
+        if ((*i).data_type != (*j)->data_type) return false;
+    }
+
+    return true;
+
+} 
 
 string create_temp_table(vector<table_column *> *t) {
     uuid_t out;
-    char *uuid_str;
+    char *uuid_str = new char[36];
     uuid_generate(out);
-    // uuid_unparse(out, uuid_str);
+    uuid_unparse(out, uuid_str);
     create_table_stmt *cs = new create_table_stmt(uuid_str, t);
 
     xyzsql_process_create_table(cs);
@@ -45,7 +58,7 @@ void calc_algric_tree(algbric_node *root) {
             old_col_list = catm.exist_relation((root->left->table))->cols;
 
             for( auto x : *(root->projection_list) ) {
-                auto att = catm.exist_relation(x->relation_name)->get_column(x->relation_name);
+                auto att = catm.exist_relation(x->relation_name)->get_column(x->attribute_name);
                 new_col_list->push_back(new table_column(x->full_name.c_str(), att->data_type, att->str_len, 0 ));
             }
             table_name = create_temp_table(new_col_list);
@@ -305,6 +318,7 @@ void xyzsql_process_delete() {
         assert(base_addr.back() == '/');
         system(("rm " + base_addr + s->table_name + "/*.db").c_str());
     } else {
+        int record_size = catm.calc_record_size(s->table_name);
         BufferManager.newTrashCan();
         // unique 
         condition *p = NULL, *eq = NULL;
@@ -321,29 +335,44 @@ void xyzsql_process_delete() {
             auto t = eq == NULL ? p->left_attr : eq->left_attr;
             if (eq != NULL) p = eq;
             indexIterator a;
-            int asdf = IndexManager.selectNode(a, base_addr + t->relation_name + "/index_" + t->attribute_name + ".db", 
+            int asdf = IndexManager.selectNode(a, base_addr + "/" + t->relation_name + "/index_" + t->attribute_name + ".db", 
                     p->op, (p->v).to_str(catm.get_data_type(t)));
-            if ( asdf == 1 ) {
+            if ( asdf == 0 ) {
                 int b = 0, c = 0;
                 while (a.next(b, c) == 0) {
-                    Record a = RecordManager.getRecord(t->relation_name, b, c, 0);
+                    Record a = RecordManager.getRecord(t->relation_name, b, c, record_size);
                     if (calc_conditions(s->condition_list, a))
                         BufferManager.appendTrashCan(b, c);
                 }
             }
         } else {
             indexIterator a;
-            int asdf = IndexManager.getStarter(a, base_addr + s->table_name + "/index_" + catm.get_primary(s->table_name) + ".db");
-            if (asdf == 1) {
+            int asdf = IndexManager.getStarter(a, base_addr + "/" + s->table_name + "/index_" + catm.get_primary(s->table_name) + ".db");
+            if (asdf == 0) {
                 int b = 0, c = 0;
                 while (a.next(b, c) == 0) {
-                    Record a = RecordManager.getRecord(s->table_name, b, c, 0);
+                    Record a = RecordManager.getRecord(s->table_name, b, c, record_size);
                     if (calc_conditions(s->condition_list, a))
                         BufferManager.appendTrashCan(b, c);
                 }
             }
         }
-        BufferManager.emptyTrashCan();
+
+        BufferManager.beginFetchTrash();
+        int blockNum, offset;
+        while(BufferManager.fetchTrash(blockNum, offset)) {
+            auto r = RecordManager.getRecord(s->table_name, blockNum, offset, record_size);
+
+            for(auto x : *(r.table_info)) {
+                if(x->flag & (table_column::unique_attr | table_column::primary_attr)) {
+                    indexIterator cursor;
+                    IndexManager.deleteNode(s->table_name + "/index_" + x->name + ".db", r.get_value(x).to_str(x->data_type));
+                } 
+            }
+
+            RecordManager.deleteRecord(s->table_name, blockNum, offset, record_size);
+        }
+
     }
     cout << "records deleted." << endl;
 }
@@ -352,8 +381,25 @@ void xyzsql_process_insert(insert_stmt *s ) {
     if ( s == NULL )
         s = dynamic_cast<insert_stmt *>(stmt_queue.front().second);
 
+    auto t = catm.exist_relation(s->table_name)->cols;
+    if (verify_validation(s->values, t) == false) 
+        throw invalid_argument("Uncapatable values");
+    
+    auto table_info = catm.exist_relation(s->table_name);
+    Record r(*(s->values), table_info->cols);
+
+    for(auto x : *(r.table_info)) {
+        if(x->flag & (table_column::unique_attr | table_column::primary_attr)) {
+            string filename;
+            indexIterator cursor;
+            cout << r.get_value(x).to_str(x->data_type) << endl;
+            int asdf = IndexManager.selectNode(cursor, s->table_name + "/index_" + x->name + ".db", 
+                    condition::EQUALTO, r.get_value(x).to_str(x->data_type));
+            if (asdf == 0) throw invalid_argument("Unique Key already exists.");
+        } 
+    }
+
     int blockNum, offset;
-    Record r(*(s->values), catm.exist_relation(s->table_name)->cols);
     RecordManager.insertRecord(s->table_name, r, blockNum, offset);
 
     for(auto x : *(r.table_info)) {

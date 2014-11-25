@@ -318,6 +318,7 @@ void xyzsql_process_delete() {
         assert(base_addr.back() == '/');
         system(("rm " + base_addr + s->table_name + "/*.db").c_str());
     } else {
+        int record_size = catm.calc_record_size(s->table_name);
         BufferManager.newTrashCan();
         // unique 
         condition *p = NULL, *eq = NULL;
@@ -339,7 +340,7 @@ void xyzsql_process_delete() {
             if ( asdf == 0 ) {
                 int b = 0, c = 0;
                 while (a.next(b, c) == 0) {
-                    Record a = RecordManager.getRecord(t->relation_name, b, c, catm.calc_record_size(s->table_name));
+                    Record a = RecordManager.getRecord(t->relation_name, b, c, record_size);
                     if (calc_conditions(s->condition_list, a))
                         BufferManager.appendTrashCan(b, c);
                 }
@@ -350,13 +351,19 @@ void xyzsql_process_delete() {
             if (asdf == 1) {
                 int b = 0, c = 0;
                 while (a.next(b, c) == 0) {
-                    Record a = RecordManager.getRecord(s->table_name, b, c, catm.calc_record_size(s->table_name));
+                    Record a = RecordManager.getRecord(s->table_name, b, c, record_size);
                     if (calc_conditions(s->condition_list, a))
                         BufferManager.appendTrashCan(b, c);
                 }
             }
         }
-        BufferManager.emptyTrashCan();
+
+        BufferManager.beginFetchTrash();
+        int blockNum, offset;
+        while(BufferManager.fetchTrash(blockNum, offset)) {
+            RecordManager.deleteRecord(s->table_name, blockNum, offset, record_size);
+        }
+
     }
     cout << "records deleted." << endl;
 }

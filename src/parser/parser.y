@@ -72,22 +72,22 @@ using namespace std;
 
 %%
 
-stmt_list: stmt ';' {  }
-         | stmt ';' stmt_list { cout << "Got a create stmt!" << endl; }
+stmt_list: stmt {  }
+         | stmt stmt_list { cout << "Got a create stmt!" << endl; }
 ;
 
-stmt    : create_table_stmt     { xyzsql_emit_stmt(stmt_type::_create_table_stmt,   $1); }
-        | select_stmt           { xyzsql_emit_stmt(stmt_type::_select_stmt,         $1); }
-        | create_index_stmt     { xyzsql_emit_stmt(stmt_type::_create_index_stmt,   $1); }
-        | insert_stmt           { xyzsql_emit_stmt(stmt_type::_insert_stmt,         $1); }
-        | drop_index_stmt       { xyzsql_emit_stmt(stmt_type::_drop_index_stmt,     $1); }
-        | drop_table_stmt       { xyzsql_emit_stmt(stmt_type::_drop_table_stmt,     $1); }
-        | delete_stmt           { xyzsql_emit_stmt(stmt_type::_delete_stmt,         $1); }
-        | exefile               { xyzsql_emit_stmt(stmt_type::_exefile_stmt,        $1); }
-        | quit                  { xyzsql_emit_stmt(stmt_type::_quit_stmt,           NULL); }
-        | transaction_on        { xyzsql_emit_stmt(stmt_type::_transaction_stmt,    NULL); }
-        | commit                { xyzsql_emit_stmt(stmt_type::_commit_stmt,         NULL); }
-        | rollback              { xyzsql_emit_stmt(stmt_type::_rollback_stmt,       NULL); }
+stmt    : create_table_stmt ';' { xyzsql_emit_stmt(stmt_type::_create_table_stmt,   $1); }
+        | select_stmt       ';' { xyzsql_emit_stmt(stmt_type::_select_stmt,         $1); }
+        | create_index_stmt ';' { xyzsql_emit_stmt(stmt_type::_create_index_stmt,   $1); }
+        | insert_stmt       ';' { xyzsql_emit_stmt(stmt_type::_insert_stmt,         $1); }
+        | drop_index_stmt   ';' { xyzsql_emit_stmt(stmt_type::_drop_index_stmt,     $1); }
+        | drop_table_stmt   ';' { xyzsql_emit_stmt(stmt_type::_drop_table_stmt,     $1); }
+        | delete_stmt       ';' { xyzsql_emit_stmt(stmt_type::_delete_stmt,         $1); }
+        | exefile           ';' { xyzsql_emit_stmt(stmt_type::_exefile_stmt,        $1); }
+        | quit              ';' { xyzsql_emit_stmt(stmt_type::_quit_stmt,           NULL); }
+        | transaction_on    ';' { xyzsql_emit_stmt(stmt_type::_transaction_stmt,    NULL); }
+        | commit            ';' { xyzsql_emit_stmt(stmt_type::_commit_stmt,         NULL); }
+        | rollback          ';' { xyzsql_emit_stmt(stmt_type::_rollback_stmt,       NULL); }
 ;
 
 /* create statements */

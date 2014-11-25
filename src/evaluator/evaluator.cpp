@@ -431,7 +431,7 @@ void xyzsql_process_insert(insert_stmt *s ) {
     for(auto x : *(r.table_info)) {
         if(x->flag & (table_column::unique_attr | table_column::primary_attr)) {
             IndexManager.insertNode(s->table_name + "/index_" + x->name + ".db", 
-                    r.get_value(catm.get_primary(s->table_name)).to_str(table_column::INTTYPE) , blockNum, offset);
+                    r.get_value(catm.get_primary(s->table_name)).to_str(x->data_type) , blockNum, offset);
         } 
     }
 

@@ -37,15 +37,15 @@ int main() {
     int ii = 10;
 
     while(ii < 1200) {
-        // char * line = readline(">>> ");
-        // add_history(line);
+        char * line = readline(">>> ");
+        add_history(line);
 
-        string tmp1("insert into q values ("), ddd;
+        // string tmp1("insert into q values ("), ddd;
 
-        stringstream tmp_s;
-        tmp_s << ii;
-        ddd = tmp1 + tmp_s.str() + ");";
-        const char * line = ddd.c_str();
+        // stringstream tmp_s;
+        // tmp_s << ii;
+        // ddd = tmp1 + tmp_s.str() + ");";
+        // const char * line = ddd.c_str();
         int len = strlen(line);
         // for (int i = 0; i < len; i++) line[i] = toupper(line[i]);
         cout << "What you typed: " << line << endl;

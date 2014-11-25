@@ -1668,13 +1668,13 @@ yyreduce:
 
   case 55:
 #line 178 "src/parser/parser.y" /* yacc.c:1646  */
-    { (yyval.valuelist) = new vector<record_value>; (yyval.valuelist)->push_back(*((yyvsp[0].valueval))); delete (yyvsp[0].valueval);}
+    { (yyval.valuelist) = new vector<record_value>(); (yyval.valuelist)->push_back(*((yyvsp[0].valueval))); delete (yyvsp[0].valueval);}
 #line 1673 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 56:
 #line 179 "src/parser/parser.y" /* yacc.c:1646  */
-    { (yyval.valuelist)->push_back(*((yyvsp[-2].valueval))); delete (yyvsp[-2].valueval); }
+    { (yyvsp[0].valuelist)->push_back(*((yyvsp[-2].valueval))); delete (yyvsp[-2].valueval); (yyval.valuelist) = (yyvsp[0].valuelist);}
 #line 1679 "parser.tab.c" /* yacc.c:1646  */
     break;
 

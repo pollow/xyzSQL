@@ -1,5 +1,6 @@
 #include "record.h"
 #include <cassert>
+#include <cstring>
 
 void Record::unpack() {
     vector<record_value> &result = values;
@@ -37,6 +38,7 @@ void Record::pack() {
 
     auto t = table_info;
     auto j = values.begin();
+    char * c;
     int ttt;
 
     for( auto i = t->begin(); i != t->end(); i++, j++) {
@@ -50,7 +52,10 @@ void Record::pack() {
                 tmp.append( (char *)&(ttt), 4 );
                 break;
             case table_column::CHARTYPE :
-                tmp.append( j->as_str(), (*i)->str_len );
+                c = new char[(*i)->str_len];
+                memset(c, 0, sizeof(char) * (*i)->str_len);
+                strcpy(c, j->as_str());
+                tmp.append(c, (*i)->str_len);
                 break;
         }
     }

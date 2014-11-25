@@ -154,10 +154,12 @@ void BufferManager::writeBlock(std::string filename, int index, Block& block) {
 void BufferManager::flushQ() {
 	File *f = nullptr;
 	for (auto i = bufQueue.begin(); i != bufQueue.end(); i++) {
-		f = findFile(i->filename);
-		f->write(i->blocknum, i->block);
+		if (i->dirty) {
+			f = findFile(i->filename);
+			f->write(i->blocknum, i->block);
+			i->dirty = false;
+		}
 	}
-	bufQueue.clear();
 }
 
 bool bufCompare(const BufferRecord& a, const BufferRecord& b) {

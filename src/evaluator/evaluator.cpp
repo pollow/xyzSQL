@@ -348,7 +348,7 @@ void xyzsql_process_delete() {
         } else {
             indexIterator a;
             int asdf = IndexManager.getStarter(a, base_addr + "/" + s->table_name + "/index_" + catm.get_primary(s->table_name) + ".db");
-            if (asdf == 1) {
+            if (asdf == 0) {
                 int b = 0, c = 0;
                 while (a.next(b, c) == 0) {
                     Record a = RecordManager.getRecord(s->table_name, b, c, record_size);

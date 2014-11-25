@@ -136,7 +136,7 @@ void calc_algric_tree(algbric_node *root) {
                 string t = root->left->table;
                 int record_size = catm.calc_record_size(t);
                 indexIterator cursor;
-                int asdf = IndexManager.getStarter(cursor, base_addr + t + "/index_" + catm.get_primary(t) + ".db");
+                int asdf = IndexManager.getStarter(cursor, t + "/index_" + catm.get_primary(t) + ".db");
                 if ( asdf == 0 ) {
                     int b = 0, c = 0;
                     while (cursor.next(b, c) == 0) {
@@ -439,7 +439,7 @@ void xyzsql_process_insert(insert_stmt *s ) {
     for(auto x : *(r.table_info)) {
         if(x->flag & (table_column::unique_attr | table_column::primary_attr)) {
             IndexManager.insertNode(s->table_name + "/index_" + x->name + ".db", 
-                    r.get_value(catm.get_primary(s->table_name)).to_str(table_column::INTTYPE) , blockNum, offset);
+                    r.get_value(x->name).to_str(x->data_type) , blockNum, offset);
         } 
     }
 

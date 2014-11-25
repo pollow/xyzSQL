@@ -17,9 +17,9 @@ float record_value::as_float() const {
 }
 
 char *record_value:: as_str() const {
-    char *tmp;
-    memcpy(&tmp, &value, 4); 
-    return tmp;
+    // char *tmp;
+    // memcpy(&tmp, &value, 4); 
+    return (char *)value;
 }
 
 int record_value::as_int() const {

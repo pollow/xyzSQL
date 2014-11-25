@@ -79,11 +79,12 @@ BufferRecord *BufferManager::insertQ(std::string filename, int num, Block* b) {
 			f = findFile(old->filename);
 			f->write(old->blocknum, old->block);			
 		}
-		f = findFile(filename);
+		//f = findFile(filename);
 		delete old->block;
 		old->filename = filename;
 		old->blocknum = num;
-		old->block = f->read(num);
+		//old->block = f->read(num); got memory leak here
+        old->block = b;
 		old->dirty = false;
 		old->accessTime = time;
 		ret = &(*old);

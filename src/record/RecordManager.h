@@ -15,13 +15,7 @@
 #include "../index/IndexManager.h"
 //#include "../catalog/catalog.h"
 
-class Cursor {
-public:
-	Cursor();
-	~Cursor();
-private:
-
-};
+class Cursor;
 
 class recordBlock : public Block {
 public:
@@ -85,7 +79,12 @@ public:
 		headOfRecord = this->dataPointer() + offset;
 		*reinterpret_cast<std::uint32_t *>(headOfRecord) = next;
 	}
-	    
+	
+    bool isValid(int offset) {
+        char * headOfRecord = this->dataPointer() + offset;
+        return (*reinterpret_cast<std::uint32_t *>(headOfRecord) == 0xffffffff);
+    }    
+
 	std::vector<unsigned char> getRecord(int size, int offset) {
 		char * headOfRecord = this->dataPointer() + offset;
 #ifdef CAN_THROW
@@ -147,14 +146,95 @@ public:
 	void deleteRecord(std::string tableName, int blocknum, int offset, int size);
 
 	Record getRecord(std::string tableName, int blocknum, int offset, int size);
-	Cursor getCursor(std::string tableName, int blocknum, int offset);
+	Cursor* getCursor(std::string tableName, int size);
 	
 private:
 	BufferManager* bm;
 	catalog_manager* cm;
 	IndexManager* im;
 	std::fstream *trashFile;
+    Cursor *cursor;
 };
+
+class Cursor {
+public:
+	Cursor() {
+        filename = "";
+        blockNum = 0;
+        offset = 0;
+        size = 0;
+        maxBlockCount = 0;
+        bm = nullptr;
+        cm = nullptr;
+    };
+
+    Cursor(BufferManager *bm,  catalog_manager *cm, std::string tableName, int blockNum, int offset, int size, int maxBlockCount){
+        this->tableName = tableName;
+        this->filename = tableName + "/" + RecordManager::master;
+        this->blockNum = blockNum;
+        this->offset = offset;
+        this->size = size;
+        this->maxBlockCount = maxBlockCount;
+        this->bm = bm;
+        this->cm = cm;
+        this->endFlag = false;
+    }; 
+
+	~Cursor() {
+
+    };
+
+    bool notEnd() {
+        return !endFlag;
+    }
+
+    Record next() {
+        int i = blockNum;
+        int j = offset;
+        int maxRecordCount = BLOCKSIZE / size - 1;
+        int maxOffset = maxRecordCount * (size + 4);
+        bool finish = false;
+        while(i <= maxBlockCount && !finish) {
+            while(j < maxOffset && !finish) {
+                j += (size + 4);
+                if (block.isValid(j)) {
+                    finish = true;
+                }
+                 
+            }
+            if (j > maxOffset) {
+                j = 0;   
+            }
+            i++;
+            if (i <= maxBlockCount) {
+                block = bm->readBlock(filename, i);
+            }
+        }               
+        if (i > maxBlockCount) { // end of all records
+            Record r;
+            endFlag = true;
+            return r;
+        } else {
+            blockNum = i;
+            offset = j;
+            auto catm = cm->exist_relation(tableName);
+            return Record(block.getRecord(size, offset), catm->cols);
+        }
+    }
+    
+private:
+    BufferManager* bm;
+    catalog_manager* cm;
+    std::string tableName;
+    std::string filename;
+    int blockNum;
+    int offset;
+    int size;
+    int maxBlockCount;
+    recordBlock block;
+    bool endFlag;
+};
+
 
 #endif
  

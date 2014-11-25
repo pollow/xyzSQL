@@ -5,7 +5,11 @@ const std::string RecordManager::master = "master.db";
 const std::string RecordManager::trash = "trash.tmp";
 
 RecordManager::RecordManager(){
-
+    bm = nullptr;
+    cm = nullptr;
+    im = nullptr;
+    trashFile = nullptr;
+    cursor = nullptr;
 }
 
 void RecordManager::Init(BufferManager* BM, catalog_manager* CM, IndexManager * IM) {
@@ -66,6 +70,17 @@ Record RecordManager::getRecord(std::string tableName, int blocknum, int offset,
 	auto cat = cm->exist_relation(tableName);
 	recordBlock r = bm->readBlock(filename, blocknum);
 	return Record(r.getRecord(size, offset), cat->cols);
+}
+
+Cursor* RecordManager::getCursor(std::string tableName, int size) {
+    std::string filename = tableName + "/" + master;
+    recordBlock start = bm->readBlock(filename, 0);
+    if (cursor != nullptr) {
+        delete cursor; 
+        cursor = nullptr;
+    }
+    cursor = new Cursor(bm, cm, tableName, 1, 0, size, start.getBlockCount());
+    return cursor;
 }
 
 RecordManager::~RecordManager() {}

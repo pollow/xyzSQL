@@ -178,6 +178,7 @@ public:
         this->bm = bm;
         this->cm = cm;
         this->endFlag = false;
+	block = bm->readBlock(filename, blockNum);	
     }; 
 
 	~Cursor() {
@@ -205,6 +206,8 @@ public:
             if (j > maxOffset) {
                 j = 0;   
             }
+	    if (finish)
+		break;
             i++;
             if (i <= maxBlockCount) {
                 block = bm->readBlock(filename, i);

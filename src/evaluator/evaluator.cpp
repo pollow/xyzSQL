@@ -59,7 +59,7 @@ void calc_algric_tree(algbric_node *root) {
 
             for( auto x : *(root->projection_list) ) {
                 auto att = catm.exist_relation(x->relation_name)->get_column(x->attribute_name);
-                new_col_list->push_back(new table_column(x->full_name.c_str(), att->data_type, att->str_len, 0 ));
+                new_col_list->push_back(new table_column((root->left->op == algbric_node::DIRECT ? x->attribute_name.c_str() : x->full_name.c_str()), att->data_type, att->str_len, 0 ));
             }
             table_name = create_temp_table(new_col_list);
 
@@ -78,7 +78,7 @@ void calc_algric_tree(algbric_node *root) {
             //     RecordManager.insertRecord(table_name, Record(result, new_col_list), blockNum, offset);
             // }
 
-            auto cursor = RecordManager.getCursor(table_name, catm.calc_record_size(table_name));
+            auto cursor = RecordManager.getCursor(root->left->table, catm.calc_record_size(root->left->table));
             while (cursor->notEnd()) {
                 Record r = cursor->next();
                 vector<record_value> result;

@@ -175,8 +175,8 @@ value       : INTNUM            { $$ = new record_value($1); cout << "int: " << 
             | STRING            { $$ = new record_value($1); cout << "string: " << $1 << " "; }
 ;
 
-value_list  : value                 { $$ = new vector<record_value>; $$->push_back(*($1)); delete $1;}
-            | value ',' value_list  { $$->push_back(*($1)); delete $1; }
+value_list  : value                 { $$ = new vector<record_value>(); $$->push_back(*($1)); delete $1;}
+            | value ',' value_list  { $3->push_back(*($1)); delete $1; $$ = $3;}
 ;
 
 insert_stmt: INSERT INTO NAME VALUES '(' value_list ')'    { $$ = new insert_stmt($3, $6); }

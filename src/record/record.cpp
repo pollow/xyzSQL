@@ -46,6 +46,7 @@ void Record::pack() {
                 tmp.append( (char *)&(ttt), 4 );
                 break;
             case table_column::FLOATTYPE :
+                ttt = j->as_int();
                 tmp.append( (char *)&(ttt), 4 );
                 break;
             case table_column::CHARTYPE :

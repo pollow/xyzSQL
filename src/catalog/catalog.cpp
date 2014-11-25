@@ -4,14 +4,14 @@
 
 catalog::catalog(const string &_name) {
     ifstream in(_name);
-    
+
     cols = new vector<table_column *>;
 
     in >> name;
-    while(in) {
-        string col_name;
+    string col_name;
+    while(in >> col_name) {
         int data_type, str_len, flag;
-        in >> col_name >> data_type >> str_len >> flag;
+        in >> data_type >> str_len >> flag;
 
         cols->push_back(new table_column(col_name.c_str(), data_type, str_len, flag));
     }
@@ -82,10 +82,9 @@ catalog_manager::catalog_manager(const string &_base_addr)
 
     ifstream in(base_addr + "catalog");
 
+    string tmp;
     if (in.is_open()) {
-        while (in) {
-            string tmp;
-            in >> tmp;
+        while (in >> tmp) {
             relations[tmp] = new catalog(base_addr + tmp + "/catalog");
             int count;
             in >> count;
@@ -155,4 +154,6 @@ int catalog_manager::calc_record_size(const string &rel_name ) {
     for( auto x : *(t->cols) ) { 
         c += x->str_len;
     }
+
+    return c;
 }

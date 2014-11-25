@@ -111,6 +111,7 @@ int main() {
 
         } catch( exception &t ) {
             cout << t.what() << endl;
+            stmt_queue.pop();
         }
     }
 

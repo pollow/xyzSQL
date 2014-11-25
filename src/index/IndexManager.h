@@ -374,7 +374,9 @@ class indexIterator
 public:
 	indexIterator(){}
 
-	~indexIterator(){}
+	~indexIterator(){
+		delete node;	
+	}
 	int next(int32_t& t1,int32_t& t2)
 	{
 		if(i<node->getKeyNumber())

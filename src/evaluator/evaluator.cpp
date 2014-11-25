@@ -58,7 +58,7 @@ void calc_algric_tree(algbric_node *root) {
             old_col_list = catm.exist_relation((root->left->table))->cols;
 
             for( auto x : *(root->projection_list) ) {
-                auto att = catm.exist_relation(x->relation_name)->get_column(x->relation_name);
+                auto att = catm.exist_relation(x->relation_name)->get_column(x->attribute_name);
                 new_col_list->push_back(new table_column(x->full_name.c_str(), att->data_type, att->str_len, 0 ));
             }
             table_name = create_temp_table(new_col_list);

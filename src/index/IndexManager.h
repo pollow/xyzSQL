@@ -375,7 +375,6 @@ public:
 	indexIterator(){}
 
 	~indexIterator(){
-		delete node;	
 	}
 	int next(int32_t& t1,int32_t& t2)
 	{

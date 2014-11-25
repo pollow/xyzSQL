@@ -361,6 +361,15 @@ void xyzsql_process_delete() {
         BufferManager.beginFetchTrash();
         int blockNum, offset;
         while(BufferManager.fetchTrash(blockNum, offset)) {
+            auto r = RecordManager.getRecord(s->table_name, blockNum, offset, record_size);
+
+            for(auto x : *(r.table_info)) {
+                if(x->flag & (table_column::unique_attr | table_column::primary_attr)) {
+                    indexIterator cursor;
+                    IndexManager.deleteNode(s->table_name + "/index_" + x->name + ".db", r.get_value(x).to_str(x->data_type));
+                } 
+            }
+
             RecordManager.deleteRecord(s->table_name, blockNum, offset, record_size);
         }
 

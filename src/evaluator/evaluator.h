@@ -9,6 +9,8 @@
 #include <cstdlib>
 #include <uuid/uuid.h>
 #include <sstream>
+#include <exception>
+#include <stdexcept>
 
 #include "../catalog/catalog.h"
 #include "../parser/stmt.h"
@@ -53,6 +55,8 @@ void xyzsql_process_insert(insert_stmt *s = NULL);
 void xyzsql_unknown_stmt() ;
 
 void xyzsql_finalize();
+
+bool verify_validation(vector<record_value> *r, vector<table_column *> *t);
 
 #endif
 

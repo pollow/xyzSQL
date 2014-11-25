@@ -41,7 +41,7 @@ table_column *catalog::get_column(const string &attr_name) {
 
 bool catalog::is_unique(const string &attr_name) {
     for(auto x : *cols) {
-        if (x->name == attr_name) return x->flag & table_column::unique_attr;
+        if (x->name == attr_name) return x->flag & (table_column::unique_attr | table_column::primary_attr);
     }
 
     return false;

@@ -300,12 +300,24 @@ void xyzsql_process_select() {
 
     calc_algric_tree(root);
 
-    indexIterator cursor;
-    IndexManager.getStarter(cursor, root->table + "/index_" + catm.get_primary(root->table) + ".db");
+    // indexIterator cursor;
+    // IndexManager.getStarter(cursor, root->table + "/index_" + catm.get_primary(root->table) + ".db");
 
-    int blockNum, offset;
-    while (cursor.next(blockNum, offset) != -1) {
-        Record t = RecordManager.getRecord(root->table, blockNum, offset, catm.calc_record_size(root->table));
+    // int blockNum, offset;
+    // while (cursor.next(blockNum, offset) != -1) {
+    //     Record t = RecordManager.getRecord(root->table, blockNum, offset, catm.calc_record_size(root->table));
+    //     auto j = t.table_info->begin();
+    //     for (record_value x : t.values)  {
+    //         cout << x.to_str((*j)->data_type) << " ";
+    //         j++;
+    //     }
+    //     cout << endl;
+    // }
+
+    auto cursor = RecordManager.getCursor(root->table, catm.calc_record_size(root->table));
+    while (cursor->next()) {
+        Record t = cursor->getRecord();
+        vector<record_value> result;
         auto j = t.table_info->begin();
         for (record_value x : t.values)  {
             cout << x.to_str((*j)->data_type) << " ";

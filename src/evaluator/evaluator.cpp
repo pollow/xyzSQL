@@ -43,6 +43,8 @@ bool calc_conditions(vector<condition *> *conditions, Record &c) {
 }
 
 void calc_algric_tree(algbric_node *root) {
+    if (root->flag == true) 
+        return;
     string table_name;
     int b = 0, c = 0;
     int blockNum, offset;
@@ -96,9 +98,13 @@ void calc_algric_tree(algbric_node *root) {
         }
         case algbric_node::SELECTION : 
         {
-            old_col_list = catm.exist_relation((root->left->table))->cols;
+            string left_name = root->left->table;
+            old_col_list = catm.exist_relation(left_name)->cols;
+            for( auto x : *(old_col_list) ) {
+                new_col_list->push_back( new table_column((left_name + "." + x->name).c_str(), x->data_type, x->str_len, x->flag ));
+            }
 
-            table_name = create_temp_table(catm.exist_relation(root->left->table)->cols);
+            table_name = create_temp_table(new_col_list);
             root->table = table_name;
 
             condition *p = NULL, *eq = NULL;
@@ -113,26 +119,28 @@ void calc_algric_tree(algbric_node *root) {
             if ( eq != NULL ) p = eq;
 
             if ( p != NULL ) {
+                int record_size = catm.calc_record_size(root->left->table);
                 auto t = p->left_attr;
                 indexIterator cursor;
-                int asdf = IndexManager.selectNode(cursor, base_addr + t->relation_name + "/index_" + t->attribute_name + ".db", 
+                int asdf = IndexManager.selectNode(cursor, t->relation_name + "/index_" + t->attribute_name + ".db", 
                         p->op, (p->v).to_str(catm.get_data_type(t)));
-                if ( asdf == 1 ) {
+                if ( asdf == 0 ) {
                     int b = 0, c = 0;
                     while (cursor.next(b, c) == 0) {
-                        Record a = RecordManager.getRecord(t->relation_name, b, c, 0);
+                        Record a = RecordManager.getRecord(t->relation_name, b, c, record_size);
                         if (calc_conditions(&(root->conditions), a))
                             RecordManager.insertRecord(table_name, a, blockNum, offset);
                     }
                 }
             } else {
-                auto t = p->left_attr;
+                string t = root->left->table;
+                int record_size = catm.calc_record_size(t);
                 indexIterator cursor;
-                int asdf = IndexManager.getStarter(cursor, base_addr + t->relation_name + "/index_" + catm.get_primary(table_name) + ".db");
-                if ( asdf == 1 ) {
+                int asdf = IndexManager.getStarter(cursor, base_addr + t + "/index_" + catm.get_primary(t) + ".db");
+                if ( asdf == 0 ) {
                     int b = 0, c = 0;
                     while (cursor.next(b, c) == 0) {
-                        Record a = RecordManager.getRecord(t->relation_name, b, c, 0);
+                        Record a = RecordManager.getRecord(t, b, c, record_size);
                         if (calc_conditions(&(root->conditions), a))
                             RecordManager.insertRecord(table_name, a, blockNum, offset);
                     }

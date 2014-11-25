@@ -63,15 +63,29 @@ void calc_algric_tree(algbric_node *root) {
             }
             table_name = create_temp_table(new_col_list);
 
-            indexIterator cursor;
-            IndexManager.getStarter(cursor, base_addr + (root->left->table) + "/index_" + catm.get_primary(table_name) + ".db");
-            while (cursor.next(b, c) == 0) {
-                Record a = RecordManager.getRecord(table_name, b, c, 0);
+            // indexIterator cursor;
+            // IndexManager.getStarter(cursor, base_addr + (root->left->table) + "/index_" + catm.get_primary(table_name) + ".db");
+            // while (cursor.next(b, c) == 0) {
+            //     Record a = RecordManager.getRecord(table_name, b, c, 0);
+            //     vector<record_value> result;
+            //     for(auto i = new_col_list->begin(); i != new_col_list->end(); i++) {
+            //         for(auto j = old_col_list->begin(); j != old_col_list->end(); j++ ) {
+            //             if ( (*i)->name == (*j)->name ) {
+            //                 result.push_back(a.values[j-old_col_list->begin()]);
+            //             }
+            //         }
+            //     }
+            //     RecordManager.insertRecord(table_name, Record(result, new_col_list), blockNum, offset);
+            // }
+
+            auto cursor = RecordManager.getCursor(table_name, catm.calc_record_size(table_name));
+            while (cursor->notEnd()) {
+                Record r = cursor->next();
                 vector<record_value> result;
                 for(auto i = new_col_list->begin(); i != new_col_list->end(); i++) {
                     for(auto j = old_col_list->begin(); j != old_col_list->end(); j++ ) {
                         if ( (*i)->name == (*j)->name ) {
-                            result.push_back(a.values[j-old_col_list->begin()]);
+                            result.push_back(r.values[j-old_col_list->begin()]);
                         }
                     }
                 }

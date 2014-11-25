@@ -2,7 +2,7 @@
 
 extern "C" int yylex();
 
-int yyerror(const char *);
+void yyerror(const char *);
 extern int yylineno;
 
 #include "src/parser/stmt.h"
@@ -202,7 +202,7 @@ exefile : EXEFILE {}
 
 %%
 
-int yyerror(const char *s) {
+void yyerror(const char *s) {
     cout << "Got An Error: " << yylineno << endl;
 }
 

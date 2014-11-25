@@ -35,8 +35,9 @@ string create_temp_table(vector<table_column *> *t) {
 
 bool calc_conditions(vector<condition *> *conditions, Record &c, Record &d) {
     for(auto x : *conditions) {
-        auto col = catm.get_column(x->left_attr);
-        if (x->calc( {col, c.get_value(col)}, {col, d.get_value(col)} ) == false) 
+        auto col1 = catm.get_column(x->left_attr);
+        auto col2 = catm.get_column(x->right_attr);
+        if (x->calc( {col2, c.get_value(col1)}, {col2, d.get_value(col2)} ) == false) 
             return false;
     }
     return true;
@@ -109,7 +110,7 @@ void calc_algric_tree(algbric_node *root) {
             string left_name = root->left->table;
             old_col_list = catm.exist_relation(left_name)->cols;
             for( auto x : *(old_col_list) ) {
-                new_col_list->push_back( new table_column((left_name + "." + x->name).c_str(), x->data_type, x->str_len, x->flag ));
+                new_col_list->push_back( new table_column(x->name.c_str(), x->data_type, x->str_len, x->flag ));
             }
 
             table_name = create_temp_table(new_col_list);
@@ -167,12 +168,10 @@ void calc_algric_tree(algbric_node *root) {
 
             for( auto x : *old_col_list ) {
                 new_col_list->push_back(new table_column((root->left->op == algbric_node::DIRECT ? (root->left->table + "." + x->name).c_str() : x->name.c_str()), x->data_type, x->str_len, 0 ));
-                cout << (root->left->op == algbric_node::DIRECT ? (root->left->table + "." + x->name).c_str() : x->name.c_str()) << endl;
             }
 
             for( auto x : *old_col_list2 ) {
                 new_col_list->push_back(new table_column((root->right->op == algbric_node::DIRECT ? (root->right->table + "." + x->name).c_str() : x->name.c_str()), x->data_type, x->str_len, 0 ));
-                cout << (root->right->op == algbric_node::DIRECT ? (root->right->table + "." + x->name).c_str() : x->name.c_str()) << endl;
             }
 
             table_name = create_temp_table(new_col_list);
@@ -194,7 +193,7 @@ void calc_algric_tree(algbric_node *root) {
             while (cursor1->next()) {
                 Record r1 = cursor1->getRecord();
                 auto cursor2 = RecordManager.getCursor(root->right->table, catm.calc_record_size(root->right->table));
-                while (cursor1->next()) {
+                while (cursor2->next()) {
                     Record r2 = cursor2->getRecord();
                     if ( calc_conditions(&(root->conditions), r1, r2) )  {
                         vector<record_value> result(r1.values);
@@ -202,7 +201,9 @@ void calc_algric_tree(algbric_node *root) {
                         RecordManager.insertRecord(table_name, Record(result, new_col_list), blockNum, offset);
                     }
                 }
+                delete cursor2;
             }
+            delete cursor1;
         }
     }
 }
@@ -232,7 +233,7 @@ void xyzsql_process_create_table(create_table_stmt *s ) {
     if ( s == NULL ) {
         s = dynamic_cast<create_table_stmt *>(stmt_queue.front().second);
         for ( auto x : *(s->cols) ) {
-            x->name = s->name + x->name;
+            x->name = s->name + "." + x->name;
         }
     }
 
@@ -300,6 +301,7 @@ void xyzsql_process_select() {
         if (root == NULL) {
             // root = new algbric_node(algbric_node::JOIN);
             root = *label;
+            rel_set.insert(root->table);
         } else {
             auto tmp = new algbric_node(algbric_node::JOIN);
             tmp->left = root;

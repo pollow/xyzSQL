@@ -41,7 +41,7 @@ class attribute {
     public:
         string attribute_name, relation_name, full_name;
 
-        attribute(const char *relt, const char *attr) : attribute_name(attr), relation_name(relt), full_name(relation_name + "." + attribute_name) {}
+        attribute(const char *relt, const char *attr) : attribute_name(attr), relation_name(relt), full_name(relation_name + "." + attribute_name) {attribute_name = full_name;}
         
 };
 
@@ -91,7 +91,8 @@ class condition {
         condition(attribute *l, char *r,        int _op) : 
             left_attr(l), v(r), op(_op), flag(false) {}
 
-        bool calc(pair<table_column *, record_value> p) ;
+        bool calc(pair<table_column *, record_value>) ;
+        bool calc(pair<table_column *, record_value>, pair<table_column *, record_value> ) ;
 
         static const int EQUALTO = 1, GREATERTHAN = 2, LESSTHAN = 3, GREATER_EQUAL = 4, LESS_EQUAL = 5, NOT_EQUAL = 6;
 };

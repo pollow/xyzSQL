@@ -69,6 +69,26 @@ int record_value::compare(int data_type, const record_value &a, const record_val
     }
 }
 
+bool condition::calc(pair<table_column *, record_value> p1, pair<table_column *, record_value> p2) {
+    assert(flag == false);
+    switch(op) {
+        case EQUALTO : 
+            return record_value::compare(p1.first->data_type, p1.second, p2.second) == 0;
+        case GREATERTHAN :                                              
+            return record_value::compare(p1.first->data_type, p1.second, p2.second) > 0;
+        case LESSTHAN :                                                 
+            return record_value::compare(p1.first->data_type, p1.second, p2.second) < 0;
+        case GREATER_EQUAL :                                            
+            return record_value::compare(p1.first->data_type, p1.second, p2.second) >= 0;
+        case LESS_EQUAL :                                               
+            return record_value::compare(p1.first->data_type, p1.second, p2.second) <= 0;
+        case NOT_EQUAL :                                                
+            return record_value::compare(p1.first->data_type, p1.second, p2.second) != 0;
+        default : 
+            return false;
+    }
+}
+
 bool condition::calc(pair<table_column *, record_value> p) {
     assert(flag == false);
     switch(op) {

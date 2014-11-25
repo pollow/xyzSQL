@@ -63,6 +63,8 @@ public:
 
 	void newTrashCan();
 	void appendTrashCan(int blocknum, int offset);
+    bool fetchTrash(int&, int&);
+    void beginFetchTrash();
 	void emptyTrashCan();
 
 private:

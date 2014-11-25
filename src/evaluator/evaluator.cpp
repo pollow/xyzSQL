@@ -1,4 +1,3 @@
-
 #include "evaluator.h"
 
 queue<pair<stmt_type, statement *> > stmt_queue;
@@ -13,7 +12,7 @@ string create_temp_table(vector<table_column *> *t) {
     uuid_t out;
     char *uuid_str;
     uuid_generate(out);
-    uuid_unparse(out, uuid_str);
+    // uuid_unparse(out, uuid_str);
     create_table_stmt *cs = new create_table_stmt(uuid_str, t);
 
     xyzsql_process_create_table(cs);
@@ -33,8 +32,9 @@ bool calc_conditions(vector<condition *> *conditions, Record &c) {
 void calc_algric_tree(algbric_node *root) {
     string table_name;
     int b = 0, c = 0;
-    auto new_col_list = new vector<table_column *>;
-    auto old_col_list = catm.exist_relation((root->left->table))->cols;
+    int blockNum, offset;
+    auto new_col_list = new vector<table_column *>, old_col_list = new_col_list;
+    // auto old_col_list = catm.exist_relation((root->left->table))->cols;
 
     switch ( root->op ) {
         case algbric_node::DIRECT :
@@ -42,6 +42,7 @@ void calc_algric_tree(algbric_node *root) {
             return;
         case algbric_node::PROJECTION : 
         {
+            old_col_list = catm.exist_relation((root->left->table))->cols;
 
             for( auto x : *(root->projection_list) ) {
                 auto att = catm.exist_relation(x->relation_name)->get_column(x->relation_name);
@@ -61,12 +62,14 @@ void calc_algric_tree(algbric_node *root) {
                         }
                     }
                 }
-                RecordManager.insertRecord(table_name, Record(result, new_col_list));
+                RecordManager.insertRecord(table_name, Record(result, new_col_list), blockNum, offset);
             }
             return;
         }
         case algbric_node::SELECTION : 
         {
+            old_col_list = catm.exist_relation((root->left->table))->cols;
+
             table_name = create_temp_table(catm.exist_relation(root->left->table)->cols);
             root->table = table_name;
 
@@ -91,7 +94,7 @@ void calc_algric_tree(algbric_node *root) {
                     while (cursor.next(b, c) == 0) {
                         Record a = RecordManager.getRecord(t->relation_name, b, c, 0);
                         if (calc_conditions(&(root->conditions), a))
-                            RecordManager.insertRecord(table_name, a);
+                            RecordManager.insertRecord(table_name, a, blockNum, offset);
                     }
                 }
             } else {
@@ -103,7 +106,7 @@ void calc_algric_tree(algbric_node *root) {
                     while (cursor.next(b, c) == 0) {
                         Record a = RecordManager.getRecord(t->relation_name, b, c, 0);
                         if (calc_conditions(&(root->conditions), a))
-                            RecordManager.insertRecord(table_name, a);
+                            RecordManager.insertRecord(table_name, a, blockNum, offset);
                     }
                 }
             }
@@ -147,6 +150,12 @@ void xyzsql_process_create_table(create_table_stmt *s ) {
         catm.add_relation(s);
         catm.write_back();
         RecordManager.createMaster(s->name);
+        for(auto x : *(s->cols)) {
+            if(x->flag & (table_column::unique_attr | table_column::primary_attr)) {
+                IndexManager.createIndex(s->name + "/index_" + x->name + ".db", data_type_to_str(x->data_type), x->str_len, 0,
+                        {}, {}, {});
+            } 
+        }
     } else 
         cerr << "Table name already exists." << endl;
 }
@@ -199,10 +208,13 @@ void xyzsql_process_select() {
         }
 
         if (root == NULL) {
-            root = new algbric_node(algbric_node::JOIN);
-            root->left = *label;
+            // root = new algbric_node(algbric_node::JOIN);
+            root = *label;
         } else {
-            root->right = *label;
+            auto tmp = new algbric_node(algbric_node::JOIN);
+            tmp->left = root;
+            tmp->right = *label;
+            root = tmp;
             for(auto x : *(s->condition_list)) {
                 if (x->flag == true) {
                     if (
@@ -214,22 +226,24 @@ void xyzsql_process_select() {
                 }
             }
 
-            rel_set.insert((root->right->left->table));
+            rel_set.insert(root->right->op == algbric_node::DIRECT ? (root->right->table) : (root->right->left->table));
 
-            auto tmp = new algbric_node(algbric_node::JOIN);
-            tmp->left = root;
-            root = tmp;
+            //tmp = new algbric_node(algbric_node::JOIN);
+            //tmp->left = root;
+            //root = tmp;
 
-            leaf_nodes.erase(label);
         }
+        leaf_nodes.erase(label);
     }
 
     // set root
-    auto tmp = new algbric_node(algbric_node::PROJECTION);
-    tmp->projection_list = s->projection_list;
-    tmp->left = root;
+    if (!s->projection_list->empty()) {
+        auto tmp = new algbric_node(algbric_node::PROJECTION);
+        tmp->projection_list = s->projection_list;
+        tmp->left = root;
 
-    root = tmp;
+        root = tmp;
+    }
 
     // auto cursor = root->left;
     // for ( auto c : *(s->condition_list) ) {
@@ -258,6 +272,20 @@ void xyzsql_process_select() {
     // }
 
     calc_algric_tree(root);
+
+    indexIterator cursor;
+    IndexManager.getStarter(cursor, root->table + "/index_" + catm.get_primary(root->table) + ".db");
+
+    int blockNum, offset;
+    while (cursor.next(blockNum, offset) != -1) {
+        Record t = RecordManager.getRecord(root->table, blockNum, offset, catm.calc_record_size(root->table));
+        auto j = t.table_info->begin();
+        for (record_value x : t.values)  {
+            cout << x.to_str((*j)->data_type) << " ";
+            j++;
+        }
+        cout << endl;
+    }
 }
 
 void xyzsql_process_drop_table() {
@@ -324,7 +352,17 @@ void xyzsql_process_insert(insert_stmt *s ) {
     if ( s == NULL )
         s = dynamic_cast<insert_stmt *>(stmt_queue.front().second);
 
-    RecordManager.insertRecord(s->table_name, Record(*(s->values), catm.exist_relation(s->table_name)->cols));
+    int blockNum, offset;
+    Record r(*(s->values), catm.exist_relation(s->table_name)->cols);
+    RecordManager.insertRecord(s->table_name, r, blockNum, offset);
+
+    for(auto x : *(r.table_info)) {
+        if(x->flag & (table_column::unique_attr | table_column::primary_attr)) {
+            IndexManager.insertNode(s->table_name + "/index_" + x->name + ".db", 
+                    r.get_value(catm.get_primary(s->table_name)).to_str(table_column::INTTYPE) , blockNum, offset);
+        } 
+    }
+
     cout << "record inserted." << endl;
 }
 

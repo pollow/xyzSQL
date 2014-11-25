@@ -139,7 +139,7 @@ drop_index_stmt : DROP INDEX NAME { $$ = new drop_index_stmt($3); }
 attribute   : NAME '.' NAME     { $$ = new attribute($1, $3); cout << "Attribute!" << endl; }
 ;
 
-select_list : '*'                           { $$ = new vector<attribute *>(); $$->push_back(new attribute("*", "*"));}
+select_list : '*'                           { $$ = new vector<attribute *>(); }
             | attribute                     { $$ = new vector<attribute *>(); $$->push_back($1);}
             | attribute ',' select_list     { $$ = $3; $$->push_back($1); }
 ;

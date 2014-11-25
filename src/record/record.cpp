@@ -7,17 +7,17 @@ void Record::unpack() {
     
     auto t = table_info;
     auto j = buf.begin();
-    for( auto i = t->begin(); i != t->end(); i++, j++) {
+    for( auto i = t->begin(); i != t->end(); j += (*i)->str_len, i++) {
         int a;
         float b;
         char * c;
         switch((*i)->data_type) {
             case table_column::INTTYPE : 
-                a = ((*j) << 24) | (*(j+1) << 16) | (*(j+2) << 8) | (*(j+3));
+                a = (*(j+3) << 24) | (*(j+2) << 16) | (*(j+1) << 8) | (*(j));
                 result.push_back(record_value(a));
                 break;
             case table_column::FLOATTYPE :
-                a = ((*j) << 24) | (*(j+1) << 16) | (*(j+2) << 8) | (*(j+3));
+                a = (*(j+3) << 24) | (*(j+2) << 16) | (*(j+1) << 8) | (*(j));
                 b = *((float *)&a);
                 result.push_back(record_value(b));
                 break;

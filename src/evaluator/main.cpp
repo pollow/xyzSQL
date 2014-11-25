@@ -103,7 +103,6 @@ int main() {
             }
 
             stmt_queue.pop();
-            BufferManager.printQ();
             BufferManager.flushQ();
 
             ii++;

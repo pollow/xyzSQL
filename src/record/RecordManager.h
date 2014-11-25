@@ -143,7 +143,7 @@ public:
 	~RecordManager();
 
 	void createMaster(std::string tableName);
-	void insertRecord(std::string tableName, Record newRecord);
+	void insertRecord(std::string tableName, Record newRecord, int&, int&);
 	void deleteRecord(std::string tableName, int blocknum, int offset, int size);
 
 	Record getRecord(std::string tableName, int blocknum, int offset, int size);

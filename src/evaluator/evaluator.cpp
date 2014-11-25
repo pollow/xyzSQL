@@ -79,8 +79,8 @@ void calc_algric_tree(algbric_node *root) {
             // }
 
             auto cursor = RecordManager.getCursor(root->left->table, catm.calc_record_size(root->left->table));
-            while (cursor->notEnd()) {
-                Record r = cursor->next();
+            while (cursor->next()) {
+                Record r = cursor->getRecord();
                 vector<record_value> result;
                 for(auto i = new_col_list->begin(); i != new_col_list->end(); i++) {
                     for(auto j = old_col_list->begin(); j != old_col_list->end(); j++ ) {

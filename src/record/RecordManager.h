@@ -185,44 +185,38 @@ public:
 
     };
 
-    bool notEnd() {
-        return !endFlag;
-    }
 
-    Record next() {
+    bool next() {
         int i = blockNum;
         int j = offset;
-        int maxRecordCount = BLOCKSIZE / size - 1;
+        int maxRecordCount = BLOCKSIZE / (size + 4)- 1;
         int maxOffset = maxRecordCount * (size + 4);
-        bool finish = false;
-        while(i <= maxBlockCount && !finish) {
-            while(j < maxOffset && !finish) {
-                j += (size + 4);
-                if (block.isValid(j)) {
-                    finish = true;
-                }
-                 
+ //       bool finish = false;
+        while(i <= maxBlockCount && j <= maxOffset) {
+            j += (size + 4);
+            if (block.isValid(j)) {
+//                finish = true;
+                break;
             }
             if (j > maxOffset) {
-                j = 0;   
+                j = 0;
+                i = i + 1;
+                if (i <= maxBlockCount) {
+                    block = bm->readBlock(filename, i);
+                }
             }
-	    if (finish)
-		break;
-            i++;
-            if (i <= maxBlockCount) {
-                block = bm->readBlock(filename, i);
-            }
-        }               
-        if (i > maxBlockCount) { // end of all records
-            Record r;
-            endFlag = true;
-            return r;
-        } else {
-            blockNum = i;
-            offset = j;
-            auto catm = cm->exist_relation(tableName);
-            return Record(block.getRecord(size, offset), catm->cols);
         }
+        if (i > maxBlockCount) {
+            return false;
+        }
+        blockNum = i;
+        offset = j;
+        return true;
+    }
+
+    Record getRecord() {
+        auto catm = cm->exist_relation(tableName);
+        return Record(block.getRecord(size, offset), catm->cols);
     }
     
 private:

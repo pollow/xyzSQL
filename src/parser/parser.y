@@ -158,7 +158,7 @@ condition   : attribute COMP attribute          { $$ = new condition($1, $3, $2)
              /* | attribute IN '(' select_stmt ')'  { $$ = new condition($1, $4, $2); } */
 ;
 
-select_stmt : SELECT select_list FROM NAME                          { $$ = new select_stmt($2, new vector<string *>(1, new string($4)), new vector<condition *>()); }
+select_stmt : SELECT select_list FROM from_list                     { $$ = new select_stmt($2, $4, new vector<condition *>()); }
             | SELECT select_list FROM from_list WHERE conditions    { $$ = new select_stmt($2, $4, $6); }
 ;
 

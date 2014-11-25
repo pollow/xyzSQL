@@ -70,7 +70,7 @@ int record_value::compare(int data_type, const record_value &a, const record_val
 }
 
 bool condition::calc(pair<table_column *, record_value> p1, pair<table_column *, record_value> p2) {
-    assert(flag == false);
+    assert(flag == true);
     switch(op) {
         case EQUALTO : 
             return record_value::compare(p1.first->data_type, p1.second, p2.second) == 0;

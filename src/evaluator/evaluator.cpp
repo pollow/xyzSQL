@@ -66,6 +66,7 @@ void calc_algric_tree(algbric_node *root) {
             return;
         case algbric_node::PROJECTION : 
         {
+            if (!root->left->flag) calc_algric_tree(root->left);
             old_col_list = catm.exist_relation((root->left->table))->cols;
 
             for( auto x : *(root->projection_list) ) {
@@ -103,6 +104,8 @@ void calc_algric_tree(algbric_node *root) {
                 }
                 RecordManager.insertRecord(table_name, Record(result, new_col_list), blockNum, offset);
             }
+
+            root->flag = true;
             return;
         }
         case algbric_node::SELECTION : 
@@ -162,16 +165,18 @@ void calc_algric_tree(algbric_node *root) {
         case algbric_node::JOIN :
         {
             // nested-loop join
+            if (!root->left->flag) calc_algric_tree(root->left);
+            if (!root->right->flag) calc_algric_tree(root->right);
             
             old_col_list = catm.exist_relation((root->left->table))->cols;
             old_col_list2= catm.exist_relation((root->right->table))->cols;
 
             for( auto x : *old_col_list ) {
-                new_col_list->push_back(new table_column((root->left->op == algbric_node::DIRECT ? (root->left->table + "." + x->name).c_str() : x->name.c_str()), x->data_type, x->str_len, 0 ));
+                new_col_list->push_back(new table_column(x->name.c_str(), x->data_type, x->str_len, 0 ));
             }
 
             for( auto x : *old_col_list2 ) {
-                new_col_list->push_back(new table_column((root->right->op == algbric_node::DIRECT ? (root->right->table + "." + x->name).c_str() : x->name.c_str()), x->data_type, x->str_len, 0 ));
+                new_col_list->push_back(new table_column(x->name.c_str(), x->data_type, x->str_len, 0 ));
             }
 
             table_name = create_temp_table(new_col_list);
@@ -204,6 +209,9 @@ void calc_algric_tree(algbric_node *root) {
                 delete cursor2;
             }
             delete cursor1;
+
+            root->flag = true;
+            return;
         }
     }
 }
@@ -277,6 +285,7 @@ void xyzsql_process_select() {
             }
         }
         if (select->conditions.empty()) {
+            direct->flag = true;
             leaf_nodes.push_back(direct);
             delete select;
         } else {
@@ -308,6 +317,7 @@ void xyzsql_process_select() {
             tmp->right = *label;
             root = tmp;
             string right_name = root->right->op == algbric_node::DIRECT ? (root->right->table) : (root->right->left->table);
+
             for(auto x : *(s->condition_list)) {
                 if (x->flag == true) {
                     if (

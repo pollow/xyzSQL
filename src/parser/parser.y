@@ -92,7 +92,7 @@ stmt    : create_table_stmt ';' { xyzsql_emit_stmt(stmt_type::_create_table_stmt
 
 /* create statements */
 
-create_table_stmt : CREATE TABLE NAME '(' create_col_list ')' { $$ = new create_table_stmt($3, $5); }
+create_table_stmt : CREATE TABLE NAME '(' create_col_list ')' { $$ = new create_table_stmt($3, $5); delete $3;}
 ;
 
 data_type: INT                      { $$ = table_column::INTTYPE; cout << "INT" << endl; }
@@ -110,7 +110,7 @@ column_atts :               { $$ = 0; cout << "No Attribute." << endl; }
 opt_length  :                   { $$ = 4; }
             | '(' INTNUM ')'    { $$ = $2; }
 
-create_def  : NAME data_type opt_length column_atts     { $$ = new table_column($1, $2, $3, $4); cout << "This column is: " << $1 << " " << $2 << " " << $3 << endl; }
+create_def  : NAME data_type opt_length column_atts     { $$ = new table_column($1, $2, $3, $4); cout << "This column is: " << $1 << " " << $2 << " " << $3 << endl; delete $1;}
             | PRIMARY KEY '(' NAME ')'                  {}
             | INDEX '(' NAME ')'                        {}
 ;
@@ -121,22 +121,22 @@ create_col_list :                                   {  }
 
 /* create index */
 
-create_index_stmt   : CREATE INDEX NAME ON NAME '(' NAME ')' { $$ = new create_index_stmt($3, $5, $7); }
+create_index_stmt   : CREATE INDEX NAME ON NAME '(' NAME ')' { $$ = new create_index_stmt($3, $5, $7); delete $3;}
 ;
 
 /* drop table */
 
-drop_table_stmt : DROP TABLE NAME { $$ = new drop_table_stmt($3); }
+drop_table_stmt : DROP TABLE NAME { $$ = new drop_table_stmt($3); delete $3;}
 ;
 
 /* drop index */
 
-drop_index_stmt : DROP INDEX NAME { $$ = new drop_index_stmt($3); }
+drop_index_stmt : DROP INDEX NAME { $$ = new drop_index_stmt($3); delete $3;}
 ;
 
 /* select */
 
-attribute   : NAME '.' NAME     { $$ = new attribute($1, $3); cout << "Attribute!" << endl; }
+attribute   : NAME '.' NAME     { $$ = new attribute($1, $3); cout << "Attribute!" << endl; delete $1; delete $3;}
 ;
 
 select_list : '*'                           { $$ = new vector<attribute *>(); }
@@ -144,8 +144,8 @@ select_list : '*'                           { $$ = new vector<attribute *>(); }
             | attribute ',' select_list     { $$ = $3; $$->push_back($1); }
 ;
 
-from_list   : NAME                  { $$ = new vector<string *>(); $$->push_back(new string($1)); }
-            | NAME ',' from_list    { $$ = $3; $$->push_back(new string($1)); }
+from_list   : NAME                  { $$ = new vector<string *>(); $$->push_back(new string($1)); delete $1;}
+            | NAME ',' from_list    { $$ = $3; $$->push_back(new string($1)); delete $1;}
 ;
 
 conditions  : condition                 { $$ = new vector<condition *>(); $$->push_back($1); }
@@ -155,6 +155,9 @@ condition   : attribute COMP attribute          { $$ = new condition($1, $3, $2)
             | attribute COMP STRING             { $$ = new condition($1, $3, $2); }
             | attribute COMP INTNUM             { $$ = new condition($1, $3, $2); }
             | attribute COMP FLOATNUM           { $$ = new condition($1, $3, $2); }
+            | STRING COMP attribute             { $$ = new condition($1, $2, $3); }
+            | INTNUM COMP attribute             { $$ = new condition($1, $2, $3); }
+            | FLOATNUM COMP attribute           { $$ = new condition($1, $2, $3); }
              /* | attribute IN '(' select_stmt ')'  { $$ = new condition($1, $4, $2); } */
 ;
 
@@ -164,8 +167,8 @@ select_stmt : SELECT select_list FROM from_list                     { $$ = new s
 
 /* DELETE */
 
-delete_stmt : DELETE FROM NAME                  { $$ = new delete_stmt($3, new vector<condition *>); }
-            | DELETE FROM NAME WHERE conditions { $$ = new delete_stmt($3, $5); }
+delete_stmt : DELETE FROM NAME                  { $$ = new delete_stmt($3, new vector<condition *>); delete $3;}
+            | DELETE FROM NAME WHERE conditions { $$ = new delete_stmt($3, $5); delete $3;}
 ;
 
 /* INSERT */
@@ -179,7 +182,7 @@ value_list  : value                 { $$ = new vector<record_value>(); $$->push_
             | value ',' value_list  { $3->push_back(*($1)); delete $1; $$ = $3;}
 ;
 
-insert_stmt: INSERT INTO NAME VALUES '(' value_list ')'    { $$ = new insert_stmt($3, $6); }
+insert_stmt: INSERT INTO NAME VALUES '(' value_list ')'    { $$ = new insert_stmt($3, $6); delete $3;}
 
 /* Transaction */
 

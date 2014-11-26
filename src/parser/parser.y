@@ -73,7 +73,7 @@ using namespace std;
 %%
 
 stmt_list: stmt {  }
-         | stmt stmt_list { cout << "Got a create stmt!" << endl; }
+         | stmt stmt_list { }
 ;
 
 stmt    : create_table_stmt ';' { xyzsql_emit_stmt(stmt_type::_create_table_stmt,   $1); }
@@ -95,22 +95,22 @@ stmt    : create_table_stmt ';' { xyzsql_emit_stmt(stmt_type::_create_table_stmt
 create_table_stmt : CREATE TABLE NAME '(' create_col_list ')' { $$ = new create_table_stmt($3, $5); delete $3;}
 ;
 
-data_type: INT                      { $$ = table_column::INTTYPE; cout << "INT" << endl; }
-         | CHAR                     { $$ = table_column::CHARTYPE; cout << "CHAR" << endl; }
-         | FLOAT                    { $$ = table_column::FLOATTYPE; cout << "FLOAT" << endl; }
+data_type: INT                      { $$ = table_column::INTTYPE; }
+         | CHAR                     { $$ = table_column::CHARTYPE; }
+         | FLOAT                    { $$ = table_column::FLOATTYPE; }
 ;
 
-column_atts :               { $$ = 0; cout << "No Attribute." << endl; }
-            | PRIMARY KEY   { $$ = table_column::primary_attr; cout << "PRIMARY" << endl; }
-            | INDEX         { $$ = table_column::index_attr; cout << "INDEX" << endl; }
-            | NOT NULLX     { $$ = table_column::notnull_attr; cout << "NOT NULL" << endl; }
-            | UNIQUE        { $$ = table_column::unique_attr; cout << "UNIQUE" << endl; }
+column_atts :               { $$ = 0; }
+            | PRIMARY KEY   { $$ = table_column::primary_attr; }
+            | INDEX         { $$ = table_column::index_attr; }
+            | NOT NULLX     { $$ = table_column::notnull_attr; }
+            | UNIQUE        { $$ = table_column::unique_attr; }
 ;
 
 opt_length  :                   { $$ = 4; }
             | '(' INTNUM ')'    { $$ = $2; }
 
-create_def  : NAME data_type opt_length column_atts     { $$ = new table_column($1, $2, $3, $4); cout << "This column is: " << $1 << " " << $2 << " " << $3 << endl; delete $1;}
+create_def  : NAME data_type opt_length column_atts     { $$ = new table_column($1, $2, $3, $4); delete $1;}
             | PRIMARY KEY '(' NAME ')'                  {}
             | INDEX '(' NAME ')'                        {}
 ;
@@ -121,22 +121,22 @@ create_col_list :                                   {  }
 
 /* create index */
 
-create_index_stmt   : CREATE INDEX NAME ON NAME '(' NAME ')' { $$ = new create_index_stmt($3, $5, $7); delete $3;}
+create_index_stmt   : CREATE INDEX attribute     { $$ = new create_index_stmt($3); }
 ;
 
 /* drop table */
 
-drop_table_stmt : DROP TABLE NAME { $$ = new drop_table_stmt($3); delete $3;}
+drop_table_stmt : DROP TABLE NAME { $$ = new drop_table_stmt($3); }
 ;
 
 /* drop index */
 
-drop_index_stmt : DROP INDEX NAME { $$ = new drop_index_stmt($3); delete $3;}
+drop_index_stmt : DROP INDEX attribute   { $$ = new drop_index_stmt($3); delete $3;}
 ;
 
 /* select */
 
-attribute   : NAME '.' NAME     { $$ = new attribute($1, $3); cout << "Attribute!" << endl; delete $1; delete $3;}
+attribute   : NAME '.' NAME     { $$ = new attribute($1, $3); delete $1; delete $3;}
 ;
 
 select_list : '*'                           { $$ = new vector<attribute *>(); }
@@ -170,9 +170,9 @@ delete_stmt : DELETE FROM NAME                  { $$ = new delete_stmt($3, new v
 
 /* INSERT */
 
-value       : INTNUM            { $$ = new record_value($1); cout << "int: " << $1 << " "; }
-            | FLOATNUM          { $$ = new record_value($1); cout << "float: " << $1 << " "; }
-            | STRING            { $$ = new record_value($1); cout << "string: " << $1 << " "; }
+value       : INTNUM            { $$ = new record_value($1); }
+            | FLOATNUM          { $$ = new record_value($1); }
+            | STRING            { $$ = new record_value($1); }
 ;
 
 value_list  : value                 { $$ = new vector<record_value>(); $$->push_back(*($1)); delete $1;}

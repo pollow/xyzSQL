@@ -208,7 +208,7 @@ void calc_algric_tree(algbric_node *root) {
                 Record r1 = cursor1->getRecord();
                 if ( p ) {
                     // nested-index join
-                    cout << "Index used: " << p->left_attr->full_name << endl;
+                    cout << "Index used: " << p->right_attr->full_name << endl;
                     indexIterator a;
                     int asdf = IndexManager.getStarter(a, root->right->table + "/index_" + p->right_attr->full_name + ".db");
                     if (asdf == 0) {

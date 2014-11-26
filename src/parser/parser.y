@@ -131,7 +131,7 @@ drop_table_stmt : DROP TABLE NAME { $$ = new drop_table_stmt($3); free($3);}
 
 /* drop index */
 
-drop_index_stmt : DROP INDEX attribute   { $$ = new drop_index_stmt($3); delete $3;}
+drop_index_stmt : DROP INDEX attribute   { $$ = new drop_index_stmt($3);}
 ;
 
 /* select */

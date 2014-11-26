@@ -166,6 +166,12 @@ void calc_algric_tree(algbric_node *root) {
         {
             if (!root->left->flag) calc_algric_tree(root->left);
             if (!root->right->flag) calc_algric_tree(root->right);
+            if ( catm.get_size(root->right->table) < catm.get_size(root->left->table) ) {
+                auto tmp = root->left;
+                root->left = root->right;
+                root->right = tmp;
+            }
+
             
             old_col_list = catm.exist_relation((root->left->table))->cols;
             old_col_list2= catm.exist_relation((root->right->table))->cols;

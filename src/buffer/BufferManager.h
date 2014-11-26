@@ -8,7 +8,7 @@
 #include "File.h"
 #include <iostream>
 
-#define BUFSIZE 16
+#define BUFSIZE 128
 #define	MAXTIME 0xffffffff
 //#define MAXTIME 9 // for test only
 

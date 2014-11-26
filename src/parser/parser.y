@@ -172,7 +172,7 @@ delete_stmt : DELETE FROM NAME                  { $$ = new delete_stmt($3, new v
 
 value       : INTNUM            { $$ = new record_value($1); }
             | FLOATNUM          { $$ = new record_value($1); }
-            | STRING            { $$ = new record_value($1); delete[] $1;}
+            | STRING            { $$ = new record_value($1); }
 ;
 
 value_list  : value                 { $$ = new vector<record_value>(); $$->push_back(*($1)); delete $1;}

@@ -126,6 +126,9 @@ create_index_stmt::~create_index_stmt() {
 }
 
 insert_stmt::~insert_stmt() {
+    for ( auto x : *values ) 
+        if (x.data_type == table_column::CHARTYPE)
+            delete[] x.as_str();
     delete values;
 }
 

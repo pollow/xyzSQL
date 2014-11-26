@@ -66,7 +66,7 @@ char            { return CHAR; }
 int             { return INT; }
 float           { return FLOAT; }
 
-[a-zA-Z][a-zA-Z0-9_]*       { yylval.strval = strdup(yytext); cout << "NAME: " << yytext << endl; return NAME;}
+[a-zA-Z][a-zA-Z0-9_]*       { yylval.strval = strdup(yytext); return NAME;}
 
 -?[0-9]+                    { yylval.intval = atoi(yytext); return INTNUM;}
 -?[0-9]+"."[0-9]*           { yylval.floatval = atof(yytext); return FLOATNUM; }
@@ -75,7 +75,8 @@ float           { return FLOAT; }
     char * tmp = new char[len-1]; 
     memcpy(tmp, yytext+1, len-2); 
     tmp[len-2] = 0;
-    yylval.strval = tmp; cout << "String: " << yytext << endl; return STRING; }
+    yylval.strval = tmp; 
+    return STRING; }
 
 "="     { yylval.intval = 1; return COMP; } 
 ">"     { yylval.intval = 2; return COMP; } 

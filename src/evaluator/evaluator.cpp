@@ -210,7 +210,7 @@ void calc_algric_tree(algbric_node *root) {
                     // nested-index join
                     cout << "Index used: " << p->left_attr->full_name << endl;
                     indexIterator a;
-                    int asdf = IndexManager.getStarter(a, root->right->table + "/index_" + p->right_attr->full_name);
+                    int asdf = IndexManager.getStarter(a, root->right->table + "/index_" + p->right_attr->full_name + ".db");
                     if (asdf == 0) {
                         int b = 0, c = 0;
                         while (a.next(b, c) == 0) {
@@ -352,7 +352,7 @@ void xyzsql_process_select() {
 
         if (root == NULL) {
             root = *label;
-            rel_set.insert(root->table);
+            rel_set.insert(root->op == algbric_node::DIRECT ? (root->table) : (root->left->table));
         } else {
             auto tmp = new algbric_node(algbric_node::JOIN);
             tmp->left = root;

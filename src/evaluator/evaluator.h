@@ -11,6 +11,7 @@
 #include <sstream>
 #include <exception>
 #include <stdexcept>
+#include <cstdio>
 
 #include "../catalog/catalog.h"
 #include "../parser/stmt.h"

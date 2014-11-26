@@ -40,15 +40,7 @@ int main() {
         char * line = readline(">>> ");
         add_history(line);
 
-        // string tmp1("insert into q values ("), ddd;
-
-        // stringstream tmp_s;
-        // tmp_s << ii;
-        // ddd = tmp1 + tmp_s.str() + ");";
-        // const char * line = ddd.c_str();
         int len = strlen(line);
-        // for (int i = 0; i < len; i++) line[i] = toupper(line[i]);
-        cout << "What you typed: " << line << endl;
         char *tmp = new char[len + 2];
         strcpy(tmp, line);
         tmp[len + 1] = 0;
@@ -103,8 +95,9 @@ int main() {
                     default: xyzsql_unknown_stmt();
                 }
 
+                if ( stmt_queue.front().second != nullptr)
+                    delete stmt_queue.front().second;
                 stmt_queue.pop();
-                BufferManager.flushQ();
 
                 ii++;
             }
@@ -114,6 +107,8 @@ int main() {
             stmt_queue.pop();
         }
     }
+
+    xyzsql_finalize();
 
     return 0;
 }

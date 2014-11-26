@@ -108,3 +108,47 @@ bool condition::calc(pair<table_column *, record_value> p) {
             return false;
     }
 }
+
+select_stmt::~select_stmt() {
+    for (auto x : *projection_list) delete x;
+    delete projection_list;
+    for (auto x : *table_list) delete x;
+    delete table_list;
+    for (auto x : *condition_list) delete x;
+    delete condition_list;
+}
+
+create_table_stmt::~create_table_stmt() {
+}
+
+create_index_stmt::~create_index_stmt() {
+    delete attr;
+}
+
+insert_stmt::~insert_stmt() {
+    delete values;
+}
+
+drop_index_stmt::~drop_index_stmt() {
+    delete attr;
+}
+
+delete_stmt::~delete_stmt() {
+    for( auto x : *condition_list ) delete x;
+    delete condition_list;
+}
+
+condition::~condition() {
+    if (left_attr != nullptr) 
+        delete left_attr;
+    if (right_attr != nullptr)
+        delete right_attr;
+}
+
+algbric_node::~algbric_node() {
+    if (left != nullptr) 
+        delete left;
+    if (right != nullptr)
+        delete right;
+}
+

@@ -120,7 +120,7 @@ catalog * catalog_manager::add_relation(create_table_stmt *tmp) {
 
     new_catalog->write_back((base_addr + new_catalog->get_name()));
 
-    cout << "[debug] " << (base_addr + new_catalog->get_name() + "/catalog") << endl;
+    // cout << "[debug] " << (base_addr + new_catalog->get_name() + "/catalog") << endl;
 
     return new_catalog;
 }
@@ -168,4 +168,9 @@ int catalog_manager::calc_record_size(const string &rel_name ) {
     }
 
     return c;
+}
+
+bool catalog_manager::drop_table(const string &rel_name) {
+    delete relations[rel_name];
+    return relations.erase(rel_name);
 }

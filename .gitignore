@@ -43,3 +43,5 @@ data/*
 main.dSYM/*
 main
 
+parser.tab.*
+lex.yy.c

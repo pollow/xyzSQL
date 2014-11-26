@@ -155,9 +155,6 @@ condition   : attribute COMP attribute          { $$ = new condition($1, $3, $2)
             | attribute COMP STRING             { $$ = new condition($1, $3, $2); }
             | attribute COMP INTNUM             { $$ = new condition($1, $3, $2); }
             | attribute COMP FLOATNUM           { $$ = new condition($1, $3, $2); }
-            | STRING COMP attribute             { $$ = new condition($1, $2, $3); }
-            | INTNUM COMP attribute             { $$ = new condition($1, $2, $3); }
-            | FLOATNUM COMP attribute           { $$ = new condition($1, $2, $3); }
              /* | attribute IN '(' select_stmt ')'  { $$ = new condition($1, $4, $2); } */
 ;
 

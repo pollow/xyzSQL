@@ -6,6 +6,8 @@ extern string base_addr;
 extern RecordManager RecordManager;
 extern BufferManager BufferManager;
 extern IndexManager IndexManager;
+extern FILE *yyin;
+extern void yyparse();
 
 bool verify_validation(vector<record_value> *r, vector<table_column *> *t) {
     auto i = r->begin();
@@ -18,7 +20,6 @@ bool verify_validation(vector<record_value> *r, vector<table_column *> *t) {
     }
 
     return true;
-
 } 
 
 string create_temp_table(vector<table_column *> *t) {
@@ -76,21 +77,6 @@ void calc_algric_tree(algbric_node *root) {
             table_name = create_temp_table(new_col_list);
             root->table = table_name;
 
-            // indexIterator cursor;
-            // IndexManager.getStarter(cursor, base_addr + (root->left->table) + "/index_" + catm.get_primary(table_name) + ".db");
-            // while (cursor.next(b, c) == 0) {
-            //     Record a = RecordManager.getRecord(table_name, b, c, 0);
-            //     vector<record_value> result;
-            //     for(auto i = new_col_list->begin(); i != new_col_list->end(); i++) {
-            //         for(auto j = old_col_list->begin(); j != old_col_list->end(); j++ ) {
-            //             if ( (*i)->name == (*j)->name ) {
-            //                 result.push_back(a.values[j-old_col_list->begin()]);
-            //             }
-            //         }
-            //     }
-            //     RecordManager.insertRecord(table_name, Record(result, new_col_list), blockNum, offset);
-            // }
-
             auto cursor = RecordManager.getCursor(root->left->table, catm.calc_record_size(root->left->table));
             while (cursor->next()) {
                 Record r = cursor->getRecord();
@@ -131,6 +117,7 @@ void calc_algric_tree(algbric_node *root) {
             if ( eq != NULL ) p = eq;
 
             if ( p != NULL ) {
+                cout << "Index used: " << p->left_attr->full_name << endl;
                 int record_size = catm.calc_record_size(root->left->table);
                 auto t = p->left_attr;
                 indexIterator cursor;
@@ -208,6 +195,7 @@ void calc_algric_tree(algbric_node *root) {
                 Record r1 = cursor1->getRecord();
                 if ( p ) {
                     // nested-index join
+                    cout << "Index used: " << p->left_attr->full_name << endl;
                     indexIterator a;
                     int asdf = IndexManager.getStarter(a, root->right->table + "/index_" + p->right_attr->full_name);
                     if (asdf == 0) {
@@ -248,7 +236,15 @@ void xyzsql_emit_stmt(stmt_type t, statement *stmt) {
 }
 
 void xyzsql_batch() {
-    cout << "batch!" << endl;
+    auto s = dynamic_cast<exefile_stmt *>(stmt_queue.front().second);
+    FILE *bat = fopen(s->file_name.c_str(), "r");
+    if ( bat == NULL ) 
+        throw invalid_argument("Can not open file '" + s->file_name + "'");
+
+    yyin = bat;
+    yyparse();
+
+    fclose(bat);
 }
 
 void xyzsql_finalize() {
@@ -289,7 +285,7 @@ void xyzsql_process_create_table(create_table_stmt *s ) {
 void xyzsql_process_create_index() {
     auto s = dynamic_cast<create_index_stmt *>(stmt_queue.front().second);
     int &flag = catm.get_column(s->attr)->flag;
-    if ( flag | table_column::unique_attr ) flag |= table_column::index_attr;
+    if ( flag & table_column::unique_attr ) flag |= table_column::index_attr;
     else throw invalid_argument("Index must be created in unique attribute!");
     cout << "index created." << endl;
 }
@@ -338,7 +334,6 @@ void xyzsql_process_select() {
         }
 
         if (root == NULL) {
-            // root = new algbric_node(algbric_node::JOIN);
             root = *label;
             rel_set.insert(root->table);
         } else {
@@ -361,10 +356,6 @@ void xyzsql_process_select() {
 
             rel_set.insert(right_name);
 
-            //tmp = new algbric_node(algbric_node::JOIN);
-            //tmp->left = root;
-            //root = tmp;
-
         }
         leaf_nodes.erase(label);
     }
@@ -378,47 +369,7 @@ void xyzsql_process_select() {
         root = tmp;
     }
 
-    // auto cursor = root->left;
-    // for ( auto c : *(s->condition_list) ) {
-    //    if (!c->flag) cursor->conditions.push_back(c);
-    // }
-
-    // cursor->left = new algbric_node(algbric_node::JOIN);
-    // cursor = cursor->left;
-    // for ( auto c : *(s->condition_list) ) {
-    //    if (c->flag) cursor->conditions.push_back(c);
-    // }
-
-    // for (auto i = s->table_list->begin(); i != s->table_list->end(); i++) {
-    //     cursor->right = new algbric_node(algbric_node::DIRECT);
-    //     cursor->right->table = *i;
-
-    //     cursor->left  = new algbric_node(algbric_node::PROJECTION);
-    //     cursor = cursor->left;
-    // }
-
-    // {
-    //     cursor->op = algbric_node::DIRECT;
-    //     cursor->table = cursor->right->table;
-    //     delete cursor->right;
-    //     cursor->right = NULL;
-    // }
-
     calc_algric_tree(root);
-
-    // indexIterator cursor;
-    // IndexManager.getStarter(cursor, root->table + "/index_" + catm.get_primary(root->table) + ".db");
-
-    // int blockNum, offset;
-    // while (cursor.next(blockNum, offset) != -1) {
-    //     Record t = RecordManager.getRecord(root->table, blockNum, offset, catm.calc_record_size(root->table));
-    //     auto j = t.table_info->begin();
-    //     for (record_value x : t.values)  {
-    //         cout << x.to_str((*j)->data_type) << " ";
-    //         j++;
-    //     }
-    //     cout << endl;
-    // }
 
     auto cursor = RecordManager.getCursor(root->table, catm.calc_record_size(root->table));
     while (cursor->next()) {
@@ -433,7 +384,9 @@ void xyzsql_process_select() {
 }
 
 void xyzsql_process_drop_table() {
-
+    auto s = dynamic_cast<drop_table_stmt *>(stmt_queue.front().second);
+    system(("rm -rf " + s->table_name).c_str());
+    catm.drop_table(s->table_name);
     cout << "table dropped." << endl;
 }
 
@@ -453,6 +406,12 @@ void xyzsql_process_delete() {
     if (s->condition_list->empty()) {
         // delete all
         system(("rm " + s->table_name + "/*.db").c_str());
+        RecordManager.createMaster(s->table_name);
+        auto cols = catm.exist_relation(s->table_name)->cols;
+        for(auto x : *cols)
+            if(x->flag & (table_column::unique_attr | table_column::primary_attr))
+                IndexManager.createIndex(s->table_name + "/index_" + x->name + ".db", data_type_to_str(x->data_type), 
+                        x->str_len, 0, {}, {}, {});
     } else {
         int record_size = catm.calc_record_size(s->table_name);
         BufferManager.newTrashCan();
@@ -467,7 +426,7 @@ void xyzsql_process_delete() {
         }
 
         if ( eq != NULL || p != NULL ) {
-            // use index
+            cout << "Index used: " << p->left_attr->full_name << endl;
             auto t = eq == NULL ? p->left_attr : eq->left_attr;
             if (eq != NULL) p = eq;
             indexIterator a;

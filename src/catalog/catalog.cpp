@@ -169,3 +169,8 @@ int catalog_manager::calc_record_size(const string &rel_name ) {
 
     return c;
 }
+
+bool catalog_manager::drop_table(const string &rel_name) {
+    delete relations[rel_name];
+    return relations.erase(rel_name);
+}

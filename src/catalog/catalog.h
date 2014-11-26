@@ -67,6 +67,8 @@ class catalog_manager {
         int get_data_type( const attribute * );
 
         int calc_record_size( const string & );
+
+        bool drop_table( const string & );
 };
 
 

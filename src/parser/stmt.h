@@ -143,10 +143,10 @@ class create_table_stmt : public statement {
 
 class create_index_stmt : public statement {
     public:
-        string index_name, table_name, attr_name;
+        attribute *attr;
 
-        create_index_stmt( const string &_index_name, const string &_table_name, const string &_attr_name ) : 
-            statement(), index_name(_index_name), table_name(_table_name), attr_name(_attr_name) {}
+        create_index_stmt( attribute *_a ) : 
+            statement(), attr(_a) {}
 
 };
 
@@ -170,10 +170,11 @@ class drop_table_stmt : public statement {
 
 class drop_index_stmt : public statement {
     public:
-        string index_name;
+        attribute *attr;
 
-        drop_index_stmt( const string &_index_name ) :
-            statement(), index_name(_index_name) {}
+        drop_index_stmt( attribute *_a ) : 
+            statement(), attr(_a) {}
+
 };
 
 class delete_stmt : public statement {

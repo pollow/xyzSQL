@@ -287,7 +287,10 @@ void xyzsql_process_create_table(create_table_stmt *s ) {
 }
 
 void xyzsql_process_create_index() {
-
+    auto s = dynamic_cast<create_index_stmt *>(stmt_queue.front().second);
+    int &flag = catm.get_column(s->attr)->flag;
+    if ( flag | table_column::unique_attr ) flag |= table_column::index_attr;
+    else throw invalid_argument("Index must be created in unique attribute!");
     cout << "index created." << endl;
 }
 
@@ -430,10 +433,16 @@ void xyzsql_process_select() {
 }
 
 void xyzsql_process_drop_table() {
+
     cout << "table dropped." << endl;
 }
 
 void xyzsql_process_drop_index() {
+    auto s = dynamic_cast<drop_index_stmt *>(stmt_queue.front().second);
+    int &flag = catm.get_column(s->attr)->flag;
+    flag |= table_column::index_attr;
+    flag -= table_column::index_attr;
+
     cout << "index dropped." << endl;
 }
 
@@ -568,5 +577,4 @@ void xyzsql_process_rollback() {
 
 void xyzsql_process_transaction() {
     cout << "Transaction on." << endl;
-
 }

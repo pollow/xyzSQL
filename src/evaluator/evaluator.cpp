@@ -121,7 +121,7 @@ void calc_algric_tree(algbric_node *root) {
 
             condition *p = NULL, *eq = NULL;
             for(auto x : (root->conditions)) {
-                if ( catm.is_unique(x->left_attr) ) {
+                if ( catm.is_indexed(x->left_attr) ) {
                     p = x;
                     if (x->op == condition::EQUALTO) 
                         eq = x;
@@ -164,7 +164,6 @@ void calc_algric_tree(algbric_node *root) {
         }
         case algbric_node::JOIN :
         {
-            // nested-loop join
             if (!root->left->flag) calc_algric_tree(root->left);
             if (!root->right->flag) calc_algric_tree(root->right);
             
@@ -183,6 +182,9 @@ void calc_algric_tree(algbric_node *root) {
             root->table = table_name;
 
             auto outter_table = catm.exist_relation(root->left->table), inner_table = catm.exist_relation(root->right->table);
+            int outter_size = catm.calc_record_size(root->left->table), inner_size = catm.calc_record_size(root->left->table);
+            outter_table->get_size();
+            condition * p = NULL;
 
             for ( auto x : root->conditions ) {
                 if ( outter_table->get_column(x->left_attr->full_name) != NULL && inner_table->get_column(x->right_attr->full_name) != NULL) {
@@ -192,21 +194,46 @@ void calc_algric_tree(algbric_node *root) {
                     x->left_attr = x->right_attr;
                     x->right_attr = tmp;
                 }
+                assert( outter_table->get_column(x->left_attr->full_name) != NULL && inner_table->get_column(x->right_attr->full_name) != NULL);
+
+                if ( inner_table->is_indexed(x->right_attr->full_name) ) {
+                    p = x;
+                }
+
             }
 
-            auto cursor1 = RecordManager.getCursor(root->left->table, catm.calc_record_size(root->left->table));
+            auto cursor1 = RecordManager.getCursor(root->left->table, outter_size);
+
             while (cursor1->next()) {
                 Record r1 = cursor1->getRecord();
-                auto cursor2 = RecordManager.getCursor(root->right->table, catm.calc_record_size(root->right->table));
-                while (cursor2->next()) {
-                    Record r2 = cursor2->getRecord();
-                    if ( calc_conditions(&(root->conditions), r1, r2) )  {
-                        vector<record_value> result(r1.values);
-                        result.insert(result.end(), r2.values.begin(), r2.values.end());
-                        RecordManager.insertRecord(table_name, Record(result, new_col_list), blockNum, offset);
+                if ( p ) {
+                    // nested-index join
+                    indexIterator a;
+                    int asdf = IndexManager.getStarter(a, root->right->table + "/index_" + p->right_attr->full_name);
+                    if (asdf == 0) {
+                        int b = 0, c = 0;
+                        while (a.next(b, c) == 0) {
+                            Record r2 = RecordManager.getRecord(root->right->table, b, c, inner_size);
+                            if ( calc_conditions(&(root->conditions), r1, r2) )  {
+                                vector<record_value> result(r1.values);
+                                result.insert(result.end(), r2.values.begin(), r2.values.end());
+                                RecordManager.insertRecord(table_name, Record(result, new_col_list), blockNum, offset);
+                            }
+                        }
                     }
+                } else {
+                    // nested-loop join
+                    auto cursor2 = RecordManager.getCursor(root->right->table, inner_size);
+                    while (cursor2->next()) {
+                        Record r2 = cursor2->getRecord();
+                        if ( calc_conditions(&(root->conditions), r1, r2) )  {
+                            vector<record_value> result(r1.values);
+                            result.insert(result.end(), r2.values.begin(), r2.values.end());
+                            RecordManager.insertRecord(table_name, Record(result, new_col_list), blockNum, offset);
+                        }
+                    }
+                    delete cursor2;
                 }
-                delete cursor2;
             }
             delete cursor1;
 
@@ -417,14 +444,14 @@ void xyzsql_process_delete() {
     if (s->condition_list->empty()) {
         // delete all
         assert(base_addr.back() == '/');
-        system(("rm " + base_addr + s->table_name + "/*.db").c_str());
+        system(("rm " + s->table_name + "/*.db").c_str());
     } else {
         int record_size = catm.calc_record_size(s->table_name);
         BufferManager.newTrashCan();
         // unique 
         condition *p = NULL, *eq = NULL;
         for(auto x : *(s->condition_list)) {
-            if ( catm.is_unique(x->left_attr) ) {
+            if ( catm.is_indexed(x->left_attr) ) {
                 p = x;
                 if (x->op == condition::EQUALTO) 
                     eq = x;
@@ -448,7 +475,7 @@ void xyzsql_process_delete() {
             }
         } else {
             indexIterator a;
-            int asdf = IndexManager.getStarter(a, base_addr + "/" + s->table_name + "/index_" + catm.get_primary(s->table_name) + ".db");
+            int asdf = IndexManager.getStarter(a, s->table_name + "/index_" + catm.get_primary(s->table_name) + ".db");
             if (asdf == 0) {
                 int b = 0, c = 0;
                 while (a.next(b, c) == 0) {

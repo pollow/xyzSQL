@@ -29,6 +29,8 @@ class catalog {
 
         bool is_unique(const string &);
 
+        bool is_indexed(const string &);
+
         string get_primary();
 
         int get_pos(const string &);
@@ -55,6 +57,8 @@ class catalog_manager {
         table_column *get_column(attribute *t);
 
         bool is_unique(attribute *t);
+
+        bool is_indexed(attribute *t);
 
         string get_primary(const string &);
 

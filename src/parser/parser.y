@@ -1,6 +1,7 @@
 %{
 
 extern "C" int yylex();
+extern char *yytext;
 
 void yyerror(const char *);
 extern int yylineno;
@@ -203,6 +204,6 @@ exefile : EXEFILE STRING    {$$ = new exefile_stmt(string($2)); delete[] $2;}
 %%
 
 void yyerror(const char *s) {
-    cout << "Got An Error: " << yylineno << endl;
+    cout << "Got An Error: " << yytext << endl;
 }
 

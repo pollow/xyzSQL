@@ -416,8 +416,7 @@ void xyzsql_process_delete() {
 
     if (s->condition_list->empty()) {
         // delete all
-        assert(base_addr.back() == '/');
-        system(("rm " + base_addr + s->table_name + "/*.db").c_str());
+        system(("rm " + s->table_name + "/*.db").c_str());
     } else {
         int record_size = catm.calc_record_size(s->table_name);
         BufferManager.newTrashCan();

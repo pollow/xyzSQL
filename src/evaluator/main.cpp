@@ -36,17 +36,17 @@ int main() {
     system_init();
 
     int ii = 10;
-    time_t *start_time = nullptr, *end_time;
+    clock_t start_time = 0, end_time;
 
     while(ii < 1200) {
         if ( stmt_queue.empty() ) {
-            if (start_time != nullptr) {
-                cout << difftime(*end_time, *start_time) << " seconds used." << endl;
+            end_time = clock();
+            if (start_time != 0 ) {
+                cout << (end_time - start_time) * 1000 / CLOCKS_PER_SEC << " ms used. " << end_time - start_time << endl;
             }
-            time(end_time);
             char * line = readline(">>> ");
-            time(start_time);
             add_history(line);
+            start_time = clock();
 
             int len = strlen(line);
             char *tmp = new char[len + 2];

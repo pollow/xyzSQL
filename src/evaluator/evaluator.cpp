@@ -31,7 +31,7 @@ bool verify_validation(vector<record_value> *r, vector<table_column *> *t) {
 
 string create_temp_table(vector<table_column *> *t) {
     uuid_t out;
-    char *uuid_str = new char[36];
+    char *uuid_str = new char[40];
     uuid_generate(out);
     uuid_unparse(out, uuid_str);
     create_table_stmt *cs = new create_table_stmt(uuid_str, t);
@@ -40,7 +40,7 @@ string create_temp_table(vector<table_column *> *t) {
     xyzsql_process_create_table(cs);
 
     string res(uuid_str);
-    delete uuid_str;
+    delete[] uuid_str;
 
     return res;
 }
@@ -182,7 +182,7 @@ void calc_algric_tree(algbric_node *root) {
             root->table = table_name;
 
             auto outter_table = catm.exist_relation(root->left->table), inner_table = catm.exist_relation(root->right->table);
-            int outter_size = catm.calc_record_size(root->left->table), inner_size = catm.calc_record_size(root->left->table);
+            int outter_size = catm.calc_record_size(root->left->table), inner_size = catm.calc_record_size(root->right->table);
             outter_table->get_size();
             condition * p = NULL;
 

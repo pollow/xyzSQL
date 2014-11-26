@@ -37,20 +37,22 @@ int main() {
     int ii = 10;
 
     while(ii < 1200) {
-        char * line = readline(">>> ");
-        add_history(line);
+        if ( stmt_queue.empty() ) {
+            char * line = readline(">>> ");
+            add_history(line);
 
-        int len = strlen(line);
-        char *tmp = new char[len + 2];
-        strcpy(tmp, line);
-        tmp[len + 1] = 0;
+            int len = strlen(line);
+            char *tmp = new char[len + 2];
+            strcpy(tmp, line);
+            tmp[len + 1] = 0;
 
-        YY_BUFFER_STATE my_string_buffer = yy_scan_string(tmp);
-        yy_switch_to_buffer( my_string_buffer );
-        yyparse();
-        yy_delete_buffer( my_string_buffer );
-        
-        delete[] tmp;
+            YY_BUFFER_STATE my_string_buffer = yy_scan_string(tmp);
+            yy_switch_to_buffer( my_string_buffer );
+            yyparse();
+            yy_delete_buffer( my_string_buffer );
+
+            delete[] tmp;
+        }
 
         try {
             while( !stmt_queue.empty() ) {

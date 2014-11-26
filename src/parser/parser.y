@@ -92,7 +92,7 @@ stmt    : create_table_stmt ';' { xyzsql_emit_stmt(stmt_type::_create_table_stmt
 
 /* create statements */
 
-create_table_stmt : CREATE TABLE NAME '(' create_col_list ')' { $$ = new create_table_stmt($3, $5); delete $3;}
+create_table_stmt : CREATE TABLE NAME '(' create_col_list ')' { $$ = new create_table_stmt($3, $5); free($3);}
 ;
 
 data_type: INT                      { $$ = table_column::INTTYPE; }
@@ -110,7 +110,7 @@ column_atts :               { $$ = 0; }
 opt_length  :                   { $$ = 4; }
             | '(' INTNUM ')'    { $$ = $2; }
 
-create_def  : NAME data_type opt_length column_atts     { $$ = new table_column($1, $2, $3, $4); delete $1;}
+create_def  : NAME data_type opt_length column_atts     { $$ = new table_column($1, $2, $3, $4); free($1);}
             | PRIMARY KEY '(' NAME ')'                  {}
             | INDEX '(' NAME ')'                        {}
 ;
@@ -126,7 +126,7 @@ create_index_stmt   : CREATE INDEX attribute     { $$ = new create_index_stmt($3
 
 /* drop table */
 
-drop_table_stmt : DROP TABLE NAME { $$ = new drop_table_stmt($3); }
+drop_table_stmt : DROP TABLE NAME { $$ = new drop_table_stmt($3); free($3);}
 ;
 
 /* drop index */
@@ -136,7 +136,7 @@ drop_index_stmt : DROP INDEX attribute   { $$ = new drop_index_stmt($3); delete 
 
 /* select */
 
-attribute   : NAME '.' NAME     { $$ = new attribute($1, $3); delete $1; delete $3;}
+attribute   : NAME '.' NAME     { $$ = new attribute($1, $3); free($1); free($3);}
 ;
 
 select_list : '*'                           { $$ = new vector<attribute *>(); }
@@ -144,8 +144,8 @@ select_list : '*'                           { $$ = new vector<attribute *>(); }
             | attribute ',' select_list     { $$ = $3; $$->push_back($1); }
 ;
 
-from_list   : NAME                  { $$ = new vector<string *>(); $$->push_back(new string($1)); delete $1;}
-            | NAME ',' from_list    { $$ = $3; $$->push_back(new string($1)); delete $1;}
+from_list   : NAME                  { $$ = new vector<string *>(); $$->push_back(new string($1)); free($1);}
+            | NAME ',' from_list    { $$ = $3; $$->push_back(new string($1)); free($1);}
 ;
 
 conditions  : condition                 { $$ = new vector<condition *>(); $$->push_back($1); }
@@ -164,8 +164,8 @@ select_stmt : SELECT select_list FROM from_list                     { $$ = new s
 
 /* DELETE */
 
-delete_stmt : DELETE FROM NAME                  { $$ = new delete_stmt($3, new vector<condition *>); delete $3;}
-            | DELETE FROM NAME WHERE conditions { $$ = new delete_stmt($3, $5); delete $3;}
+delete_stmt : DELETE FROM NAME                  { $$ = new delete_stmt($3, new vector<condition *>); free($3);}
+            | DELETE FROM NAME WHERE conditions { $$ = new delete_stmt($3, $5); free($3);}
 ;
 
 /* INSERT */
@@ -179,7 +179,7 @@ value_list  : value                 { $$ = new vector<record_value>(); $$->push_
             | value ',' value_list  { $3->push_back(*($1)); delete $1; $$ = $3;}
 ;
 
-insert_stmt: INSERT INTO NAME VALUES '(' value_list ')'    { $$ = new insert_stmt($3, $6); delete $3;}
+insert_stmt: INSERT INTO NAME VALUES '(' value_list ')'    { $$ = new insert_stmt($3, $6); free($3);}
 
 /* Transaction */
 

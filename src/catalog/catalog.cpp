@@ -171,6 +171,7 @@ int catalog_manager::calc_record_size(const string &rel_name ) {
 }
 
 bool catalog_manager::drop_table(const string &rel_name) {
+    system(("rm -rf " + rel_name).c_str());
     delete relations[rel_name];
     return relations.erase(rel_name);
 }

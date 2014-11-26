@@ -401,12 +401,12 @@ void xyzsql_process_select() {
         cout << endl;
     }
 
+    if (root->op != algbric_node::DIRECT) catm.drop_table(root->table);
     delete root;
 }
 
 void xyzsql_process_drop_table() {
     auto s = dynamic_cast<drop_table_stmt *>(stmt_queue.front().second);
-    system(("rm -rf " + s->table_name).c_str());
     catm.drop_table(s->table_name);
     cout << "table dropped." << endl;
 }

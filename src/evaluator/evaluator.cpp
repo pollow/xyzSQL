@@ -182,7 +182,7 @@ void calc_algric_tree(algbric_node *root) {
             root->table = table_name;
 
             auto outter_table = catm.exist_relation(root->left->table), inner_table = catm.exist_relation(root->right->table);
-            int outter_size = catm.calc_record_size(root->left->table), inner_size = catm.calc_record_size(root->left->table);
+            int outter_size = catm.calc_record_size(root->left->table), inner_size = catm.calc_record_size(root->right->table);
             outter_table->get_size();
             condition * p = NULL;
 

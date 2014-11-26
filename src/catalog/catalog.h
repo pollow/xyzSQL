@@ -38,6 +38,10 @@ class catalog {
         int get_size();
 
         void set_size(int);
+
+        void inc_size();
+
+        void dec_size();
 };
 
 class catalog_manager {

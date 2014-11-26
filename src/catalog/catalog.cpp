@@ -64,6 +64,14 @@ int catalog::get_size() {
     return count;
 }
 
+void catalog::inc_size() {
+    count++;
+}
+
+void catalog::dec_size() {
+    count--;
+}
+
 
 string catalog::get_primary() {
     for(auto x : *cols) {

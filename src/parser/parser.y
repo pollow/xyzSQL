@@ -197,7 +197,7 @@ rollback    : ROLLBACK {}
 quit : QUIT {}
 ;
 
-exefile : EXEFILE STRING    {$$ = new exefile_stmt(string($2)); delete $2;}
+exefile : EXEFILE STRING    {$$ = new exefile_stmt(string($2)); delete[] $2;}
 ;
 
 %%

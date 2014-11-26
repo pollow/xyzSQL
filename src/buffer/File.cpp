@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <iostream>
 #include <fstream>
+#include <stdexcept>
 
 File::File() {
 	alive = false;
@@ -18,10 +19,12 @@ File::File(std::string filename) : name(filename) {
 		if (!file) {
 			std::string s = "Can not create '" + filename + "'";
 			//throw std::exception(s.c_str());
+			throw std::invalid_argument(s);
 		}
 	} else {
 		std::string s = "Can not create file '" + filename + "': file already exists";
 		//throw std::exception(s.c_str());
+		throw std::invalid_argument(s);
 	}
 	if (file) {
 		alive = true;
@@ -92,6 +95,7 @@ void File::load(std::string filename) {
 	file = std::fopen(filename.c_str(), "r");
 	if (!file) {
 		//throw std::exception(std::string("Can not load file '" + filename + "'").c_str());
+		throw std::invalid_argument("Can not load file '" + filename + "'");
 	}
 	
 	alive = true;

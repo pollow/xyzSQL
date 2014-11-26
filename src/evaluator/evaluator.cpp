@@ -426,12 +426,15 @@ void xyzsql_process_delete() {
         // delete all
         system(("rm " + s->table_name + "/*.db").c_str());
         RecordManager.createMaster(s->table_name);
-        auto cols = catm.exist_relation(s->table_name)->cols;
+        auto table_info = catm.exist_relation(s->table_name);
+        auto cols = table_info->cols;
+        table_info->set_size(0);
         for(auto x : *cols)
             if(x->flag & (table_column::unique_attr | table_column::primary_attr))
                 IndexManager.createIndex(s->table_name + "/index_" + x->name + ".db", data_type_to_str(x->data_type), 
                         x->str_len, 0, {}, {}, {});
     } else {
+        auto table_info = catm.exist_relation(s->table_name);
         int record_size = catm.calc_record_size(s->table_name);
         BufferManager.newTrashCan();
         // unique 
@@ -485,8 +488,8 @@ void xyzsql_process_delete() {
             }
 
             RecordManager.deleteRecord(s->table_name, blockNum, offset, record_size);
+            table_info->dec_size();
         }
-
     }
     cout << "records deleted." << endl;
 }
@@ -515,6 +518,7 @@ void xyzsql_process_insert(insert_stmt *s ) {
 
     int blockNum, offset;
     RecordManager.insertRecord(s->table_name, r, blockNum, offset);
+    table_info->inc_size();
 
     for(auto x : *(r.table_info)) {
         if(x->flag & (table_column::unique_attr | table_column::primary_attr)) {

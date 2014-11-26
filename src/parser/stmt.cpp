@@ -139,12 +139,16 @@ delete_stmt::~delete_stmt() {
 }
 
 condition::~condition() {
-    delete left_attr;
-    delete right_attr;
+    if (left_attr != nullptr) 
+        delete left_attr;
+    if (right_attr != nullptr)
+        delete right_attr;
 }
 
 algbric_node::~algbric_node() {
-    delete left;
-    delete right;
+    if (left != nullptr) 
+        delete left;
+    if (right != nullptr)
+        delete right;
 }
 

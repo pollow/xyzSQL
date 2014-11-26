@@ -74,7 +74,7 @@ class record_value {
 
 class condition {
     public:
-        attribute *left_attr, *right_attr;
+        attribute *left_attr = nullptr, *right_attr = nullptr;
         // string str;
         // float fnum;
         // int inum;
@@ -103,7 +103,7 @@ class algbric_node {
     public:
         int op;
         bool flag;
-        algbric_node *left, *right; 
+        algbric_node *left = nullptr, *right = nullptr; 
         string table;
         vector<condition *> conditions;
         vector<attribute *> *projection_list; 

@@ -86,6 +86,7 @@ int main() {
                     case stmt_type::_rollback_stmt:
                         xyzsql_process_rollback();
                         break;
+                    case stmt_type::_quit_stmt:
                         xyzsql_exit();
                         break;
                     case stmt_type::_exefile_stmt:
@@ -94,7 +95,8 @@ int main() {
                     default: xyzsql_unknown_stmt();
                 }
 
-                delete stmt_queue.front().second;
+                if ( stmt_queue.front().second != nullptr)
+                    delete stmt_queue.front().second;
                 stmt_queue.pop();
 
                 ii++;

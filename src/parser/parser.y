@@ -84,10 +84,10 @@ stmt    : create_table_stmt ';' { xyzsql_emit_stmt(stmt_type::_create_table_stmt
         | drop_table_stmt   ';' { xyzsql_emit_stmt(stmt_type::_drop_table_stmt,     $1); }
         | delete_stmt       ';' { xyzsql_emit_stmt(stmt_type::_delete_stmt,         $1); }
         | exefile           ';' { xyzsql_emit_stmt(stmt_type::_exefile_stmt,        $1); }
-        | quit              ';' { xyzsql_emit_stmt(stmt_type::_quit_stmt,           NULL); }
-        | transaction_on    ';' { xyzsql_emit_stmt(stmt_type::_transaction_stmt,    NULL); }
-        | commit            ';' { xyzsql_emit_stmt(stmt_type::_commit_stmt,         NULL); }
-        | rollback          ';' { xyzsql_emit_stmt(stmt_type::_rollback_stmt,       NULL); }
+        | quit              ';' { xyzsql_emit_stmt(stmt_type::_quit_stmt,           nullptr); }
+        | transaction_on    ';' { xyzsql_emit_stmt(stmt_type::_transaction_stmt,    nullptr); }
+        | commit            ';' { xyzsql_emit_stmt(stmt_type::_commit_stmt,         nullptr); }
+        | rollback          ';' { xyzsql_emit_stmt(stmt_type::_rollback_stmt,       nullptr); }
 ;
 
 /* create statements */
@@ -172,7 +172,7 @@ delete_stmt : DELETE FROM NAME                  { $$ = new delete_stmt($3, new v
 
 value       : INTNUM            { $$ = new record_value($1); }
             | FLOATNUM          { $$ = new record_value($1); }
-            | STRING            { $$ = new record_value($1); }
+            | STRING            { $$ = new record_value($1); delete[] $1;}
 ;
 
 value_list  : value                 { $$ = new vector<record_value>(); $$->push_back(*($1)); delete $1;}
@@ -197,7 +197,7 @@ rollback    : ROLLBACK {}
 quit : QUIT {}
 ;
 
-exefile : EXEFILE {}
+exefile : EXEFILE STRING    {$$ = new exefile_stmt(string($2)); delete $2;}
 ;
 
 %%

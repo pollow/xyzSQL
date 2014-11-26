@@ -7,7 +7,13 @@ extern RecordManager RecordManager;
 extern BufferManager BufferManager;
 extern IndexManager IndexManager;
 extern FILE *yyin;
-extern void yyparse();
+extern int yyparse();
+
+#define YY_BUF_SIZE 16384
+typedef struct yy_buffer_state *YY_BUFFER_STATE;
+extern YY_BUFFER_STATE yy_create_buffer ( FILE *file, int size );
+extern void yy_switch_to_buffer (YY_BUFFER_STATE new_buffer  );
+extern void yy_delete_buffer (YY_BUFFER_STATE b  );
 
 bool verify_validation(vector<record_value> *r, vector<table_column *> *t) {
     auto i = r->begin();
@@ -251,7 +257,10 @@ void xyzsql_batch() {
         throw invalid_argument("Can not open file '" + s->file_name + "'");
 
     yyin = bat;
+    YY_BUFFER_STATE new_buffer = yy_create_buffer( yyin, YY_BUF_SIZE );
+    yy_switch_to_buffer(new_buffer);
     yyparse();
+    yy_delete_buffer(new_buffer);
 
     fclose(bat);
 }

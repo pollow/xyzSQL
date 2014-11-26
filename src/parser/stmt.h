@@ -91,6 +91,13 @@ class condition {
         condition(attribute *l, char *r,        int _op) : 
             left_attr(l), v(r), op(_op), flag(false) {}
 
+        condition(float r, attribute *l, int _op) : 
+            left_attr(l), v(r), op(_op), flag(false) {}
+        condition(int r,   attribute *l, int _op) : 
+            left_attr(l), v(r), op(_op), flag(false) {}
+        condition(char *r, attribute *l, int _op) : 
+            left_attr(l), v(r), op(_op), flag(false) {}
+
         bool calc(pair<table_column *, record_value>) ;
         bool calc(pair<table_column *, record_value>, pair<table_column *, record_value> ) ;
 

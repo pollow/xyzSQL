@@ -1066,13 +1066,13 @@ int IndexManager::selectNode(indexIterator &iterator,string fileName, int condTy
 		result=currentNode->getLeftestLeaf(iterator,fileName);
 	else
 		result=currentNode->getLeaf(iterator,fileName,condition,condType);
-	if(condType==1&&result==-1)
-	{
-		delete currentNode;
-		return -1;
-	}
 	if(!currentNode->isLeaf())
 		delete currentNode;
+	if(condType==1&&result==-1)
+	{
+//		delete currentNode;
+		return -1;
+	}
 	return 0;
 }
 

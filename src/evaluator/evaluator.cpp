@@ -248,7 +248,7 @@ void xyzsql_batch() {
 }
 
 void xyzsql_finalize() {
-
+    catm.write_back();
 }
 
 void xyzsql_exit() {

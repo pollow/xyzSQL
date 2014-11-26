@@ -115,6 +115,8 @@ int main() {
         }
     }
 
+    xyzsql_finalize();
+
     return 0;
 }
 

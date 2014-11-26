@@ -177,8 +177,6 @@ class drop_table_stmt : public statement {
 
         drop_table_stmt( const string &_table_name ) :
             statement(), table_name(_table_name) {}
-
-        ~drop_table_stmt();
 };
 
 class drop_index_stmt : public statement {
@@ -208,8 +206,6 @@ class exefile_stmt : public statement {
 
         exefile_stmt( const string &_file_name ) :
             statement(), file_name(_file_name) {}
-
-        ~exefile_stmt();
 };
 
 #endif

@@ -445,7 +445,7 @@ void treeNode::merge(treeNode* t1, treeNode*t2,string keyValue)
 Block treeNode::transform()
 {
 	Block b;
-
+	b.fillZero();
 	b.setByte(blockNumber>>24,0);
 	b.setByte(blockNumber>>16,1);
 	b.setByte(blockNumber>>8,2);
@@ -1050,12 +1050,13 @@ int IndexManager::selectNode(indexIterator &iterator,string fileName, int condTy
 	if(lastFile!=fileName)
 	{
 		if(myAnalyzer!=NULL){
-			myAnalyzer->writeBack(fileName);
+			myAnalyzer->writeBack(lastFile);
 			delete myAnalyzer;
 		}
 		tmpBlock=myBufferManager->readBlock(fileName,0);
 		tmpBlock2=myBufferManager->readBlock(fileName,1);
 		myAnalyzer=new blockAnalyzer(tmpBlock,tmpBlock2,myBufferManager);
+		lastFile = fileName;
 	}
 
 	blockPos1=myAnalyzer->getRootPosition();
@@ -1089,12 +1090,13 @@ int IndexManager::insertNode(string fileName, string value, int32_t recordBlockN
 	if(lastFile!=fileName)
 	{
 		if(myAnalyzer!=NULL){
-			myAnalyzer->writeBack(fileName);
+			myAnalyzer->writeBack(lastFile);
 			delete myAnalyzer;
 		}
 		tmpBlock=myBufferManager->readBlock(fileName,0);
 		tmpBlock2=myBufferManager->readBlock(fileName,1);
 		myAnalyzer=new blockAnalyzer(tmpBlock,tmpBlock2,myBufferManager);
+		lastFile = fileName;
 	}
 	//cout<<"in manager::insertNode1"<<endl;//////////////////////////////
 
@@ -1150,12 +1152,13 @@ int IndexManager::deleteNode(string fileName, string value)
 	{
 		if(myAnalyzer!=NULL)
 		{
-			myAnalyzer->writeBack(fileName);
+			myAnalyzer->writeBack(lastFile);
 			delete myAnalyzer;
 		}
 		tmpBlock1=myBufferManager->readBlock(fileName,0);
 		tmpBlock2=myBufferManager->readBlock(fileName,1);
 		myAnalyzer=new blockAnalyzer(tmpBlock1,tmpBlock2,myBufferManager);
+		lastFile = fileName;
 	}
 
 	blockPos=myAnalyzer->getRootPosition();

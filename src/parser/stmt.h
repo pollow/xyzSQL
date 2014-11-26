@@ -95,6 +95,8 @@ class condition {
         bool calc(pair<table_column *, record_value>, pair<table_column *, record_value> ) ;
 
         static const int EQUALTO = 1, GREATERTHAN = 2, LESSTHAN = 3, GREATER_EQUAL = 4, LESS_EQUAL = 5, NOT_EQUAL = 6;
+
+        ~condition();
 };
 
 class algbric_node {
@@ -109,6 +111,8 @@ class algbric_node {
         algbric_node(int _op) : op(_op) { flag = false; }
 
         static const int DIRECT = 0, PROJECTION = 1, SELECTION = 2, JOIN = 3, PRODUCTION = 4;
+
+        ~algbric_node();
 };
 
 class statement {
@@ -126,6 +130,8 @@ class select_stmt : public statement {
 
         select_stmt(vector<attribute *> *pl, vector<string *> *tl, vector<condition *> *cl) : 
             statement(), projection_list(pl), table_list(tl), condition_list(cl) {}
+
+        ~select_stmt();
 };
 
 class create_table_stmt : public statement {
@@ -139,6 +145,8 @@ class create_table_stmt : public statement {
 
         create_table_stmt(const char *_name, vector<table_column *> *_cols) : 
             statement(), name(_name), cols(_cols) {}
+
+        ~create_table_stmt();
 };
 
 class create_index_stmt : public statement {
@@ -148,6 +156,7 @@ class create_index_stmt : public statement {
         create_index_stmt( attribute *_a ) : 
             statement(), attr(_a) {}
 
+        ~create_index_stmt();
 };
 
 
@@ -158,6 +167,8 @@ class insert_stmt : public statement {
 
         insert_stmt( const string &_table_name, vector<record_value> *_values ) : 
             statement(), table_name(_table_name), values(_values) {}
+
+        ~insert_stmt();
 };
 
 class drop_table_stmt : public statement {
@@ -166,6 +177,8 @@ class drop_table_stmt : public statement {
 
         drop_table_stmt( const string &_table_name ) :
             statement(), table_name(_table_name) {}
+
+        ~drop_table_stmt();
 };
 
 class drop_index_stmt : public statement {
@@ -175,6 +188,7 @@ class drop_index_stmt : public statement {
         drop_index_stmt( attribute *_a ) : 
             statement(), attr(_a) {}
 
+        ~drop_index_stmt();
 };
 
 class delete_stmt : public statement {
@@ -185,6 +199,7 @@ class delete_stmt : public statement {
         delete_stmt(const string _table_name, vector<condition *> *_condition_list) :
             statement(), table_name(_table_name), condition_list(_condition_list) {}
 
+        ~delete_stmt();
 };
 
 class exefile_stmt : public statement {
@@ -193,6 +208,8 @@ class exefile_stmt : public statement {
 
         exefile_stmt( const string &_file_name ) :
             statement(), file_name(_file_name) {}
+
+        ~exefile_stmt();
 };
 
 #endif

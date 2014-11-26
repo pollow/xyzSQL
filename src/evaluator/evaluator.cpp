@@ -29,9 +29,13 @@ string create_temp_table(vector<table_column *> *t) {
     uuid_unparse(out, uuid_str);
     create_table_stmt *cs = new create_table_stmt(uuid_str, t);
 
+
     xyzsql_process_create_table(cs);
 
-    return string(uuid_str);
+    string res(uuid_str);
+    delete uuid_str;
+
+    return res;
 }
 
 bool calc_conditions(vector<condition *> *conditions, Record &c, Record &d) {
@@ -90,6 +94,8 @@ void calc_algric_tree(algbric_node *root) {
                 }
                 RecordManager.insertRecord(table_name, Record(result, new_col_list), blockNum, offset);
             }
+
+            if (root->left->op != algbric_node::DIRECT) catm.drop_table(root->left->table);
 
             root->flag = true;
             return;
@@ -225,6 +231,9 @@ void calc_algric_tree(algbric_node *root) {
             }
             delete cursor1;
 
+            if (root->right->op != algbric_node::DIRECT) catm.drop_table(root->right->table);
+            if (root->left->op != algbric_node::DIRECT) catm.drop_table(root->left->table);
+
             root->flag = true;
             return;
         }
@@ -249,6 +258,7 @@ void xyzsql_batch() {
 
 void xyzsql_finalize() {
     catm.write_back();
+    BufferManager.flushQ();
 }
 
 void xyzsql_exit() {
@@ -381,6 +391,8 @@ void xyzsql_process_select() {
         }
         cout << endl;
     }
+
+    delete root;
 }
 
 void xyzsql_process_drop_table() {

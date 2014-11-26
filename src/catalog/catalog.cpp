@@ -120,7 +120,7 @@ catalog * catalog_manager::add_relation(create_table_stmt *tmp) {
 
     new_catalog->write_back((base_addr + new_catalog->get_name()));
 
-    cout << "[debug] " << (base_addr + new_catalog->get_name() + "/catalog") << endl;
+    // cout << "[debug] " << (base_addr + new_catalog->get_name() + "/catalog") << endl;
 
     return new_catalog;
 }

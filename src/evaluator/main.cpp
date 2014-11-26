@@ -35,14 +35,13 @@ int main() {
 
     system_init();
 
-    int ii = 10;
     clock_t start_time = 0, end_time;
 
-    while(ii < 1200) {
+    while(true) {
         if ( stmt_queue.empty() ) {
             end_time = clock();
             if (start_time != 0 ) {
-                cout << (end_time - start_time) * 1000 / CLOCKS_PER_SEC << " ms used. " << end_time - start_time << endl;
+                cout << (end_time - start_time) / (float)CLOCKS_PER_SEC * 1000 << " ms used. " << end_time - start_time << endl;
             }
             char * line = readline(">>> ");
             add_history(line);
@@ -107,8 +106,6 @@ int main() {
                 if ( stmt_queue.front().second != nullptr)
                     delete stmt_queue.front().second;
                 stmt_queue.pop();
-
-                ii++;
             }
 
         } catch( exception &t ) {

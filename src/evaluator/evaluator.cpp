@@ -253,12 +253,16 @@ void xyzsql_emit_stmt(stmt_type t, statement *stmt) {
 
 void xyzsql_batch() {
     auto s = dynamic_cast<exefile_stmt *>(stmt_queue.front().second);
+    FILE *tmp =  fopen(s->file_name.c_str(), "r");
+    fseek(tmp, 0, SEEK_END);
+    int buf_length = ftell(tmp);
+    fclose(tmp);
     FILE *bat = fopen(s->file_name.c_str(), "r");
     if ( bat == NULL ) 
         throw invalid_argument("Can not open file '" + s->file_name + "'");
 
     yyin = bat;
-    YY_BUFFER_STATE new_buffer = yy_create_buffer( yyin, YY_BUF_SIZE );
+    YY_BUFFER_STATE new_buffer = yy_create_buffer( yyin, buf_length );
     yy_switch_to_buffer(new_buffer);
     yyparse();
     yy_delete_buffer(new_buffer);

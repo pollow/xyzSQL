@@ -6,10 +6,9 @@ extern string base_addr;
 extern RecordManager RecordManager;
 extern BufferManager BufferManager;
 extern IndexManager IndexManager;
-extern FILE *yyin;
+extern ifstream bat;
 extern int yyparse();
 
-#define YY_BUF_SIZE 16384
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 extern YY_BUFFER_STATE yy_create_buffer ( FILE *file, int size );
 extern void yy_switch_to_buffer (YY_BUFFER_STATE new_buffer  );
@@ -210,11 +209,11 @@ void calc_algric_tree(algbric_node *root) {
 
             auto cursor1 = RecordManager.getCursor(root->left->table, outter_size);
 
+	    cout << "Index used: " << p->right_attr->full_name << endl;
             while (cursor1->next()) {
                 Record r1 = cursor1->getRecord();
                 if ( p ) {
                     // nested-index join
-                    cout << "Index used: " << p->right_attr->full_name << endl;
                     indexIterator a;
                     int asdf = IndexManager.getStarter(a, root->right->table + "/index_" + p->right_attr->full_name + ".db");
                     if (asdf == 0) {
@@ -259,21 +258,20 @@ void xyzsql_emit_stmt(stmt_type t, statement *stmt) {
 
 void xyzsql_batch() {
     auto s = dynamic_cast<exefile_stmt *>(stmt_queue.front().second);
-    FILE *tmp =  fopen(s->file_name.c_str(), "r");
-    fseek(tmp, 0, SEEK_END);
-    int buf_length = ftell(tmp);
-    fclose(tmp);
-    FILE *bat = fopen(s->file_name.c_str(), "r");
-    if ( bat == NULL ) 
-        throw invalid_argument("Can not open file '" + s->file_name + "'");
+    // FILE *tmp =  fopen(s->file_name.c_str(), "r");
+    // fseek(tmp, 0, SEEK_END);
+    // int buf_length = ftell(tmp);
+    // fclose(tmp);
 
-    yyin = bat;
-    YY_BUFFER_STATE new_buffer = yy_create_buffer( yyin, buf_length );
-    yy_switch_to_buffer(new_buffer);
-    yyparse();
-    yy_delete_buffer(new_buffer);
+    bat.open(s->file_name);
 
-    fclose(bat);
+    // yyin = bat;
+    // YY_BUFFER_STATE new_buffer = yy_create_buffer( yyin, buf_length );
+    // yy_switch_to_buffer(new_buffer);
+    // yyparse();
+    // yy_delete_buffer(new_buffer);
+
+    // fclose(bat);
 }
 
 void xyzsql_finalize() {
@@ -519,7 +517,6 @@ void xyzsql_process_insert(insert_stmt *s ) {
         if(x->flag & (table_column::unique_attr | table_column::primary_attr)) {
             string filename;
             indexIterator cursor;
-            cout << r.get_value(x).to_str(x->data_type) << endl;
             int asdf = IndexManager.selectNode(cursor, s->table_name + "/index_" + x->name + ".db", 
                     condition::EQUALTO, r.get_value(x).to_str(x->data_type));
             if (asdf == 0) throw invalid_argument("Unique Key already exists.");
@@ -536,8 +533,6 @@ void xyzsql_process_insert(insert_stmt *s ) {
                     r.get_value(x->name).to_str(x->data_type) , blockNum, offset);
         } 
     }
-
-    cout << "record inserted." << endl;
 }
 
 void xyzsql_unknown_stmt() {

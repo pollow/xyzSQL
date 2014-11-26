@@ -22,6 +22,8 @@ IndexManager IndexManager(&BufferManager);
 catalog_manager catm(".");
 RecordManager RecordManager;
 
+ifstream bat;
+
 string base_addr = ".";
 
 void system_init() { 
@@ -36,29 +38,37 @@ int main() {
     system_init();
 
     clock_t start_time = 0, end_time;
+    string command;
 
     while(true) {
-        if ( stmt_queue.empty() ) {
+	const char *line;
+        if ( !bat.is_open() ) {
             end_time = clock();
             if (start_time != 0 ) {
                 cout << (end_time - start_time) / (float)CLOCKS_PER_SEC * 1000 << " ms used. " << end_time - start_time << endl;
             }
-            char * line = readline(">>> ");
+            line = readline(">>> ");
             add_history(line);
             start_time = clock();
-
-            int len = strlen(line);
-            char *tmp = new char[len + 2];
-            strcpy(tmp, line);
-            tmp[len + 1] = 0;
-
-            YY_BUFFER_STATE my_string_buffer = yy_scan_string(tmp);
-            yy_switch_to_buffer( my_string_buffer );
-            yyparse();
-            yy_delete_buffer( my_string_buffer );
-
-            delete[] tmp;
+        } else {
+            getline(bat, command);
+            if(bat.eof()) {
+		bat.close();
+		continue;
+	    }
+	    line = command.c_str();
         }
+	int len = strlen(line);
+	char *tmp = new char[len + 2];
+	strcpy(tmp, line);
+	tmp[len + 1] = 0;
+
+	YY_BUFFER_STATE my_string_buffer = yy_scan_string(tmp);
+	yy_switch_to_buffer( my_string_buffer );
+	yyparse();
+	yy_delete_buffer( my_string_buffer );
+
+	delete[] tmp;
 
         try {
             while( !stmt_queue.empty() ) {

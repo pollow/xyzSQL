@@ -23,6 +23,7 @@ bool verify_validation(vector<record_value> *r, vector<table_column *> *t) {
 
     for( ; i != r->end(); i++, j++) {
         if ((*i).data_type != (*j)->data_type) return false;
+        if ((*i).data_type == table_column::CHARTYPE && strlen((*i).as_str()) >= (*j)->str_len) return false;
     }
 
     return true;
@@ -287,18 +288,15 @@ void xyzsql_process_create_table(create_table_stmt *s ) {
         }
     }
 
-    if ( catm.exist_relation(s->name) == NULL ) {
-        catm.add_relation(s);
-        catm.write_back();
-        RecordManager.createMaster(s->name);
-        for(auto x : *(s->cols)) {
-            if(x->flag & (table_column::unique_attr | table_column::primary_attr)) {
-                IndexManager.createIndex(s->name + "/index_" + x->name + ".db", data_type_to_str(x->data_type), x->str_len, 0,
-                        {}, {}, {});
-            } 
-        }
-    } else 
-        cerr << "Table name already exists." << endl;
+    catm.add_relation(s);
+    catm.write_back();
+    RecordManager.createMaster(s->name);
+    for(auto x : *(s->cols)) {
+        if(x->flag & (table_column::unique_attr | table_column::primary_attr)) {
+            IndexManager.createIndex(s->name + "/index_" + x->name + ".db", data_type_to_str(x->data_type), x->str_len, 0,
+                    {}, {}, {});
+        } 
+    }
 }
 
 void xyzsql_process_create_index() {

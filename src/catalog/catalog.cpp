@@ -21,6 +21,7 @@ catalog::catalog(const string &_name) {
 
 void catalog::write_back(const string &addr) {
     ofstream out(addr + "/catalog");
+    cout << addr + "/catalog" << endl;
 
     out << name << endl;
     for(auto x : *cols) {
@@ -106,31 +107,31 @@ catalog_manager::catalog_manager(const string &_base_addr)
 catalog * catalog_manager::exist_relation(const string &rel_name) {
     auto tmp = relations.find(rel_name);
     if ( tmp == relations.end() )
-        return NULL; 
+        throw invalid_argument("Table does not exist."); 
     else return tmp->second;
 }
 
 catalog * catalog_manager::add_relation(create_table_stmt *tmp) {
+    if (relations.count(tmp->name) == 1)
+        throw invalid_argument("Table already exsists.");
     auto new_catalog = new catalog(tmp);
     relations[tmp->name] = new_catalog;
 
     // mkdir and write back
-    mkdir((base_addr + "/" + new_catalog->get_name()).c_str(), 0777);
+    mkdir((new_catalog->get_name()).c_str(), 0777);
     // TODO exception handler
 
-    new_catalog->write_back((base_addr + new_catalog->get_name()));
-
-    // cout << "[debug] " << (base_addr + new_catalog->get_name() + "/catalog") << endl;
+    new_catalog->write_back((new_catalog->get_name()));
 
     return new_catalog;
 }
 
 void catalog_manager::write_back() {
-    ofstream out(base_addr + "/catalog");
+    ofstream out("catalog");
 
     for ( auto x : relations ) {
         out << x.first << " " << x.second->get_size() << endl;
-        x.second->write_back(base_addr + x.second->get_name());
+        x.second->write_back(x.second->get_name());
     }
 
     out.close();
@@ -170,8 +171,12 @@ int catalog_manager::calc_record_size(const string &rel_name ) {
     return c;
 }
 
-bool catalog_manager::drop_table(const string &rel_name) {
-    system(("rm -rf " + rel_name).c_str());
-    delete relations[rel_name];
-    return relations.erase(rel_name);
+void catalog_manager::drop_table(const string &rel_name) {
+    if (relations.count(rel_name) == 0) 
+        throw invalid_argument("Table does not exist.");
+    else {
+        system(("rm -rf " + rel_name).c_str());
+        delete relations[rel_name];
+        relations.erase(rel_name);
+    }
 }

@@ -68,7 +68,7 @@ class catalog_manager {
 
         int calc_record_size( const string & );
 
-        bool drop_table( const string & );
+        void drop_table( const string & );
 };
 
 

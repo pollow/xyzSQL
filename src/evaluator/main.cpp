@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cctype>
 #include <sstream>
+#include <ctime>
 #include "../parser/stmt.h"
 #include "../../parser.tab.h"
 #include "evaluator.h"
@@ -35,11 +36,17 @@ int main() {
     system_init();
 
     int ii = 10;
+    clock_t start_time = 0, end_time;
 
     while(ii < 1200) {
         if ( stmt_queue.empty() ) {
+            end_time = clock();
+            if (start_time != 0 ) {
+                cout << (end_time - start_time) * 1000 / CLOCKS_PER_SEC << " ms used. " << end_time - start_time << endl;
+            }
             char * line = readline(">>> ");
             add_history(line);
+            start_time = clock();
 
             int len = strlen(line);
             char *tmp = new char[len + 2];

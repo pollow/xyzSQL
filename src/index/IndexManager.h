@@ -372,9 +372,13 @@ private:
 class indexIterator
 {
 public:
-	indexIterator(){}
+	indexIterator(){
+		node = nullptr;
+	}
 
 	~indexIterator(){
+		if (node)
+			delete node;
 	}
 	int next(int32_t& t1,int32_t& t2)
 	{

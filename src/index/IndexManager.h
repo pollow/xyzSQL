@@ -211,11 +211,11 @@ public:
 	{
 		delete[] children;
 		delete[] blockOffset;
-		if(!keyInt)
+		if(keyInt)
 			delete[] keyInt;
-		if(!keyFloat)
+		if(keyFloat)
 			delete[] keyFloat;
-		if(!keyStr)
+		if(keyStr)
 			delete[] keyStr;
 	}
 	bool compare(string condition,int32_t i);

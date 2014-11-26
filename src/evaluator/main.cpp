@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cctype>
 #include <sstream>
+#include <ctime>
 #include "../parser/stmt.h"
 #include "../../parser.tab.h"
 #include "evaluator.h"
@@ -35,10 +36,16 @@ int main() {
     system_init();
 
     int ii = 10;
+    time_t *start_time = nullptr, *end_time;
 
     while(ii < 1200) {
         if ( stmt_queue.empty() ) {
+            if (start_time != nullptr) {
+                cout << difftime(*end_time, *start_time) << " seconds used." << endl;
+            }
+            time(end_time);
             char * line = readline(">>> ");
+            time(start_time);
             add_history(line);
 
             int len = strlen(line);

@@ -307,18 +307,19 @@ void xyzsql_process_select() {
             tmp->left = root;
             tmp->right = *label;
             root = tmp;
+            string right_name = root->right->op == algbric_node::DIRECT ? (root->right->table) : (root->right->left->table);
             for(auto x : *(s->condition_list)) {
                 if (x->flag == true) {
                     if (
-                            (rel_set.count(x->left_attr->relation_name) && (root->right->table) == x->right_attr->relation_name) || 
-                            (rel_set.count(x->right_attr->relation_name) && (root->right->table) == x->left_attr->relation_name) ) {
+                            (rel_set.count(x->left_attr->relation_name) && right_name == x->right_attr->relation_name) || 
+                            (rel_set.count(x->right_attr->relation_name) && right_name == x->left_attr->relation_name) ) {
 
                         root->conditions.push_back(x);
                     }
                 }
             }
 
-            rel_set.insert(root->right->op == algbric_node::DIRECT ? (root->right->table) : (root->right->left->table));
+            rel_set.insert(right_name);
 
             //tmp = new algbric_node(algbric_node::JOIN);
             //tmp->left = root;
